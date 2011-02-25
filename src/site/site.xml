@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="${project.name}">
+  <bannerLeft>
+    <name>${project.name}</name>
+    <href>${project.url}</href>
+  </bannerLeft>
+  <publishDate position="left" format="yyyy-MM-dd HH:mm" />
+  <version position="left"/>
+  <poweredBy>  
+    <logo name="Build with Maven 2" href="http://maven.apache.org" img="images/logos/maven-feather.png" />
+    <logo name="CC-GNU LGPL" href="http://creativecommons.org/licenses/LGPL/2.1/" img="http://creativecommons.org/images/public/cc-LGPL-a.png" />
+  </poweredBy>
+
+  <body>
+    <links>
+      <item name="changelog/scm" href="https://github.com/jakewins/requirejs-maven"/>
+    </links>
+
+    <menu name="Overview">
+      <item name="Introduction" href="index.html" />
+      <item name="Distribution" href="index.html#Distribution" />
+      <item name="Usage: compile" href="usage_compile.html" />
+      <!-- item name="FAQ" href="faq.html" /-->
+    </menu>
+
+    <menu name="Links">
+      <item name="Require.js" href="http://requirejs.org/" />
+    </menu>
+
+    <menu ref="reports"/>
+  </body>
+</project>

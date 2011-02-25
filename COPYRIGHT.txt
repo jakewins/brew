@@ -1,0 +1,6 @@
+Coffeescript-maven
+Copyright (c) 2002-2011 Jacob Hansson <jacob@voltvoodoo.com>
+
+This software is open source. For legalese details, see LICENSE.txt and NOTICE.txt.
+
+For more information, contact jacob@voltvoodoo.com

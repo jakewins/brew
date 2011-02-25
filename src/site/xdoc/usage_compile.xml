@@ -1,0 +1,51 @@
+<document>
+	<properties>
+		<author email="jacob@voltvoodoo.com">Jacob Hansson</author>
+	</properties>
+	<body>
+		<section name="Usage">
+
+			<subsection name="Without pom.xml change">
+				<p>
+					To compile all coffeescripts in ${basedir}/src/main/coffeescript and put the result in ${project.build.outputDirectory}
+					<source><![CDATA[
+ $> mvn com.voltvoodoo.coffeescript-maven:compile
+ ]]></source>
+				</p>
+			</subsection>
+
+			<subsection name="With pom.xml change">
+				<p>
+					To compile all coffeescripts in src/main/coffee and put the result in target/classes
+					<source><![CDATA[
+<project>
+...
+  <build>
+    <plugins>
+...
+      <plugin>
+        <groupId>com.voltvoodoo</groupId>
+        <artifactId>coffeescript-maven</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>compile</goal>
+            </goals>
+          </execution>
+        </executions> 
+        <configuration>
+          <sourceDir>src/main/coffee</sourceDir>
+          <outputDir>target/classes</outputDir>
+        </configuration>
+      </plugin>
+...
+    </plugins>
+  </build>
+...
+</project>
+ ]]></source>
+				</p>
+			</subsection>
+		</section>
+	</body>
+</document>

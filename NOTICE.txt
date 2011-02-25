@@ -1,0 +1,19 @@
+Coffeescript-maven
+Copyright (c) 2002-2011 Jacob Hansson <jacob@voltvoodoo.com>
+
+Requirejs-maven is released under the LGPL. See LICENSE.txt.
+
+Third party libraries
+---------------------
+
+See LICENSES.txt for full licenses.
+
+Jcoffeescript is copyright 2010 David Yeung. It is licensed under an apache license.
+
+Coffeescript is copyright (c) 2011 Jeremy Ashkenas, licensed under a custom license.
+
+JSON2 is copyright Douglas Crockford, released as "Public domain"
+
+Haml-js is copyright (c) 2009 Tim Caswell, licensed under the MIT license
+
+Require.js is licensed under the MIT or the new BSD license
