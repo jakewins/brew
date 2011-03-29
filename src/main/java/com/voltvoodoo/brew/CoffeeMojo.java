@@ -58,7 +58,7 @@ public class CoffeeMojo extends AbstractMojo {
         } catch (RuntimeException exc) {
             throw exc;
         } catch (Exception exc) {
-            throw new MojoExecutionException("wrap: " + exc.getMessage(), exc);
+            throw new MojoExecutionException(exc.getMessage(), exc);
         }
     }
     
@@ -91,6 +91,7 @@ public class CoffeeMojo extends AbstractMojo {
         if(js.exists()) {
             js.delete();
         }
+        js.getParentFile().mkdirs();
         js.createNewFile();
         
         FileInputStream in = new FileInputStream(coffee);

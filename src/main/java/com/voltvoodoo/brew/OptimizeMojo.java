@@ -155,7 +155,7 @@ public class OptimizeMojo extends AbstractMojo {
         } catch (RuntimeException exc) {
             throw exc;
         } catch (Exception exc) {
-            throw new MojoExecutionException("wrap: " + exc.getMessage(), exc);
+            throw new MojoExecutionException(exc.getMessage(), exc);
         }
     }
     

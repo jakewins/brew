@@ -43,18 +43,19 @@ public class HamlMojo extends AbstractMojo {
         } catch (RuntimeException exc) {
             throw exc;
         } catch (Exception exc) {
-            throw new MojoExecutionException("wrap: " + exc.getMessage(), exc);
+            throw new MojoExecutionException(exc.getMessage(), exc);
         }
     }
     
     public void compile(String relativePath) throws IOException
     {
-        File coffee = new File(hamlSourceDir, relativePath);
-        File js = new File(hamlOutputDir, relativePath.substring(0, relativePath.lastIndexOf('.')) + ".js");
+        File coffee = new File(hamlSourceDir, relativePath).getAbsoluteFile();
+        File js = new File(hamlOutputDir, relativePath.substring(0, relativePath.lastIndexOf('.')) + ".js").getAbsoluteFile();
 
         if(js.exists()) {
             js.delete();
         }
+        js.getParentFile().mkdirs();
         js.createNewFile();
         
         FileInputStream in = new FileInputStream(coffee);
