@@ -28,9 +28,16 @@
         var encoding = "utf-8",
             file = new java.io.File(url),
             lineSeparator = java.lang.System.getProperty("line.separator"),
-            input = new java.io.BufferedReader(new java.io.InputStreamReader(new java.io.FileInputStream(file), encoding)),
+            input,
             stringBuffer, line,
             content = '';
+        
+        if(file.exists()) {
+            input = new java.io.BufferedReader(new java.io.InputStreamReader(new java.io.FileInputStream(file), encoding));
+        } else {
+            input = new java.io.BufferedReader(new java.io.InputStreamReader(getResourceAsStream( path ), encoding));
+        }
+        
         try {
             stringBuffer = new java.lang.StringBuffer();
             line = input.readLine();

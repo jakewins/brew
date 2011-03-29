@@ -36,10 +36,12 @@
 package com.voltvoodoo.brew;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Map;
 
@@ -85,7 +87,7 @@ public class RhinoRunner extends ScriptableObject {
             // Define some global functions particular to the BasicRhinoShell.
             // Note
             // that these functions are not part of ECMA.
-            String[] names = { "print", "load", "readFile", "warn" };
+            String[] names = { "print", "load", "readFile", "warn", "getResourceAsStream" };
             runner.defineFunctionProperties(names, RhinoRunner.class, ScriptableObject.DONTENUM);
 
             for(String include : includes) {
@@ -151,7 +153,15 @@ public class RhinoRunner extends ScriptableObject {
      */
     public String readFile(String path) {
         try {
-            return IOUtil.toString(new FileInputStream(path));
+            InputStream inputStream;
+            File file = new File(path);
+            if (file.exists()) {
+                inputStream = new FileInputStream(path);
+            } else {
+                inputStream = getClass().getClassLoader().getResourceAsStream(path);
+            }
+              
+            return IOUtil.toString(inputStream);
         } catch (RuntimeException exc) {
             throw exc;
         } catch (Exception exc) {
@@ -166,9 +176,25 @@ public class RhinoRunner extends ScriptableObject {
      *
      */
     public static void load(Context cx, Scriptable thisObj, Object[] args, Function funObj) {
-        RhinoRunner BasicRhinoShell = (RhinoRunner) getTopLevelScope(thisObj);
+        RhinoRunner runner = (RhinoRunner) getTopLevelScope(thisObj);
         for (Object element : args) {
-            BasicRhinoShell.processSource(cx, Context.toString(element));
+            runner.processSource(cx, Context.toString(element));
+        }
+    }
+    
+    public InputStream getResourceAsStream(String path) {
+        File file = new File(path);
+        if(file.exists()) {
+            try
+            {
+                return new FileInputStream(path);
+            }
+            catch ( FileNotFoundException e )
+            {
+                throw new RuntimeException(e);
+            }
+        } else {
+            return getClass().getClassLoader().getResourceAsStream( path );
         }
     }
 

@@ -49,12 +49,12 @@ public class HamlCompiler
                     reader.close();
                 }
             } catch (UnsupportedEncodingException e) {
-                throw new Error(e); // This should never happen
+                throw new Error(e);
             } finally {
                 inputStream.close();
             }
         } catch (IOException e) {
-            throw new Error(e); // This should never happen
+            throw new Error(e);
         }
     }
 

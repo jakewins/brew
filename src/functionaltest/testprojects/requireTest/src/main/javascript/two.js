@@ -1,4 +1,4 @@
-define(['three'],function() {
+define(['order!three'],function() {
     return {
         'akeythatwecanlookfor' : "two.js"
     };

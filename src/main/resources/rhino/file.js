@@ -153,8 +153,15 @@ define(function () {
             //A file read function that can deal with BOMs
             encoding = encoding || "utf-8";
             var fileObj = new java.io.File(path),
-                    input = new java.io.BufferedReader(new java.io.InputStreamReader(new java.io.FileInputStream(fileObj), encoding)),
-                    stringBuffer, line;
+                input,
+                stringBuffer, line;
+            
+            if(file.exists()) {
+                input = new java.io.BufferedReader(new java.io.InputStreamReader(new java.io.FileInputStream(fileObj), encoding));
+            } else {
+                input = new java.io.BufferedReader(new java.io.InputStreamReader(getResourceAsStream( path ), encoding));
+            }
+            
             try {
                 stringBuffer = new java.lang.StringBuffer();
                 line = input.readLine();

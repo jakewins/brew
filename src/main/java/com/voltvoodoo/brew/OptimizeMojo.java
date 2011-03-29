@@ -150,7 +150,7 @@ public class OptimizeMojo extends AbstractMojo {
             Optimizer builder = new Optimizer();
             ErrorReporter reporter = new DefaultErrorReporter(getLog(), true);
             
-            builder.build( optimizeSourceDir, createBuildProfile(), reporter );
+            builder.build( optimizeSourceDir, optimizeOutputDir, createBuildProfile(), reporter );
             
         } catch (RuntimeException exc) {
             throw exc;
