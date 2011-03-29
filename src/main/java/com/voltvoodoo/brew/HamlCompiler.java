@@ -65,13 +65,20 @@ public class HamlCompiler
             Scriptable compileScope = context.newObject(globalScope);
             compileScope.setParentScope(globalScope);
             compileScope.put("hamlSource", compileScope, haml);
-            return (String)context.evaluateString(
+            
+            String compiledTemplate = (String)context.evaluateString(
                     compileScope, 
                     "Haml.optimize(Haml.compile(hamlSource));",
                     "HamlCompiler", 0, null);
+            
+            return wrapWithRequireModuleDefinition(compiledTemplate);
         } finally {
             Context.exit();
         }
+    }
+    
+    private String wrapWithRequireModuleDefinition(String script) {
+        return "define(function(){return function(vars){ with(vars||{}) { return " + script + ";}}; });";
     }
 
 }

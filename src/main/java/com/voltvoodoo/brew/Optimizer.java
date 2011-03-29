@@ -43,14 +43,14 @@ public class Optimizer
         rhinoAdaptor.deleteOnExit();
     }
 
-    public void build( File projectDir, File outputDir, File buildProfile, ErrorReporter reporter ) throws IOException
+    public void build( File projectDir, File buildProfile, ErrorReporter reporter ) throws IOException
     {
         
-        // Move require deps into output dir temporarily.
+        // Move require deps into project dir temporarily.
         // These can not be loaded from classpath, because
         // require.js assumes these will be intermingled with the
         // raw source files we are compiling.
-        putRequirePluginsIn(outputDir);
+        putRequirePluginsIn(projectDir);
         
         String[] includes = new String[2];
         includes[0] = requireJs.getAbsolutePath();
@@ -65,7 +65,7 @@ public class Optimizer
         RhinoRunner.exec(includes, buildScript.getAbsolutePath(), args, globalVariables, reporter);
         
         
-        removeRequirePluginsFrom(outputDir);
+        removeRequirePluginsFrom(projectDir);
     }
 
     private File copyFileFromClassPathToFilesystem( String classpathFilename,

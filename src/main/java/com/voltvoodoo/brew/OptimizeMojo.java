@@ -17,7 +17,7 @@ import org.mozilla.javascript.ErrorReporter;
 /**
  * 
  * @goal optimize
- * @phase process-resources
+ * @phase process-classes
  * 
  */
 public class OptimizeMojo extends AbstractMojo {
@@ -150,7 +150,7 @@ public class OptimizeMojo extends AbstractMojo {
             Optimizer builder = new Optimizer();
             ErrorReporter reporter = new DefaultErrorReporter(getLog(), true);
             
-            builder.build( optimizeSourceDir, optimizeOutputDir, createBuildProfile(), reporter );
+            builder.build( optimizeSourceDir, createBuildProfile(), reporter );
             
         } catch (RuntimeException exc) {
             throw exc;
