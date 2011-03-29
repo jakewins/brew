@@ -14,7 +14,7 @@ import org.codehaus.plexus.util.IOUtil;
 /**
  * 
  * @goal compile-haml
- * @phase compile
+ * @phase process-classes
  * 
  */
 public class HamlMojo extends AbstractMojo {

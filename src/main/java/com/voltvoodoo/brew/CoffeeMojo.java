@@ -25,7 +25,7 @@ import org.jcoffeescript.Option;
  * convert this to a compiler plugin.
  * 
  * @goal compile-coffeescript
- * @phase compile
+ * @phase process-classes
  * 
  */
 public class CoffeeMojo extends AbstractMojo {

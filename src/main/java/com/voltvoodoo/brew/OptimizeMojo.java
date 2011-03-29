@@ -12,6 +12,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.plexus.util.FileUtils;
 import org.mozilla.javascript.ErrorReporter;
 
 /**
@@ -30,11 +31,27 @@ public class OptimizeMojo extends AbstractMojo {
     private File optimizeSourceDir;
     
     /**
-     * Build modules are put here.
+     * Source tree is copied here, minified and aggregated.
+     *
+     * @parameter expression="${project.build.outputDirectory}"
+     */
+    private File optimizeBuildDir;
+    
+    /**
+     * Built modules are put here, moved from the build directory after
+     * minification and aggregation. By default this is the same as the
+     * output directory.
      *
      * @parameter expression="${project.build.outputDirectory}"
      */
     private File optimizeOutputDir;
+    
+    /**
+     * File name suffix for optimized modules. 
+     * 
+     * @parameter expression="-min"
+     */
+    private String optimizedFileNameSuffix;
     
     /**
      * Used to inline i18n resources into the built file. If no locale
@@ -151,6 +168,7 @@ public class OptimizeMojo extends AbstractMojo {
             ErrorReporter reporter = new DefaultErrorReporter(getLog(), true);
             
             builder.build( optimizeSourceDir, createBuildProfile(), reporter );
+            moveModulesToOutputDir();
             
         } catch (RuntimeException exc) {
             throw exc;
@@ -166,7 +184,7 @@ public class OptimizeMojo extends AbstractMojo {
 
     public File getDir()
     {
-        return optimizeOutputDir;
+        return optimizeBuildDir;
     }
 
     public String getLocale()
@@ -236,6 +254,18 @@ public class OptimizeMojo extends AbstractMojo {
         ObjectMapper mapper = new ObjectMapper();
         mapper.writeValue( profileFile, this );
         return profileFile;
+    }
+    
+    private void moveModulesToOutputDir() throws IOException {
+        File from, to;
+        for(ModuleDefinition mod : getModules() ) {
+            from = new File(optimizeBuildDir, mod.getName() + ".js");
+            to = new File(optimizeOutputDir, mod.getName() + optimizedFileNameSuffix + ".js");
+            System.out.println();
+            System.out.println("CP: " + from.getAbsolutePath() + " --> " + to.getAbsolutePath());
+            System.out.println();
+            FileUtils.copyFile( from, to );
+        }
     }
 
     
