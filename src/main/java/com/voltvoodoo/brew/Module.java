@@ -13,12 +13,12 @@ public class Module
     /**
      * @parameter
      */
-    private List<String> includes;
+    private List<String> include;
     
     /**
      * @parameter
      */
-    private List<String> excludes;
+    private List<String> exclude;
     
     /**
      * @parameter
@@ -45,14 +45,14 @@ public class Module
         return name;
     }
 
-    public List<String> getIncludes()
+    public List<String> getInclude()
     {
-        return includes;
+        return include;
     }
 
-    public List<String> getExcludes()
+    public List<String> getExclude()
     {
-        return excludes;
+        return exclude;
     }
 
     public List<String> getExcludeShallow()
