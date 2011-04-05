@@ -159,7 +159,7 @@ public class OptimizeMojo extends AbstractMojo {
      * only the root bundles will be included unless the locale: section is set above.
      * @parameter
      */
-    private List<ModuleDefinition> modules;
+    private List<Module> modules;
 
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
@@ -230,10 +230,10 @@ public class OptimizeMojo extends AbstractMojo {
         return skipModuleInsertion;
     }
     
-    public List<ModuleDefinition> getModules() {
+    public List<Module> getModules() {
         if(modules == null) {
-            modules = new ArrayList<ModuleDefinition>();
-            modules.add( new ModuleDefinition(module));
+            modules = new ArrayList<Module>();
+            modules.add( new Module(module));
         }
         return modules;
     }
@@ -253,17 +253,15 @@ public class OptimizeMojo extends AbstractMojo {
         File profileFile = File.createTempFile( "profile", "js" );
         ObjectMapper mapper = new ObjectMapper();
         mapper.writeValue( profileFile, this );
+        System.out.println(mapper.writeValueAsString( this ));
         return profileFile;
     }
     
     private void moveModulesToOutputDir() throws IOException {
         File from, to;
-        for(ModuleDefinition mod : getModules() ) {
+        for(Module mod : getModules() ) {
             from = new File(optimizeBuildDir, mod.getName() + ".js");
             to = new File(optimizeOutputDir, mod.getName() + optimizedFileNameSuffix + ".js");
-            System.out.println();
-            System.out.println("CP: " + from.getAbsolutePath() + " --> " + to.getAbsolutePath());
-            System.out.println();
             FileUtils.copyFile( from, to );
         }
     }

@@ -2,7 +2,7 @@ package com.voltvoodoo.brew;
 
 import java.util.List;
 
-public class ModuleDefinition
+public class Module
 {
     /**
      * @parameter
@@ -13,17 +13,17 @@ public class ModuleDefinition
     /**
      * @parameter
      */
-    private List<String> includeModules;
+    private List<String> includes;
     
     /**
      * @parameter
      */
-    private List<String> excludeModules;
+    private List<String> excludes;
     
     /**
      * @parameter
      */
-    private List<String> shallowExcludeModules;
+    private List<String> excludeShallow;
     
     /**
      * @parameter
@@ -31,11 +31,11 @@ public class ModuleDefinition
     private OptimizeMojo override;
     
 
-    public ModuleDefinition() {
+    public Module() {
         
     }
     
-    public ModuleDefinition( String name )
+    public Module( String name )
     {
         this.name = name;
     }
@@ -45,19 +45,19 @@ public class ModuleDefinition
         return name;
     }
 
-    public List<String> getIncludeModules()
+    public List<String> getIncludes()
     {
-        return includeModules;
+        return includes;
     }
 
-    public List<String> getExcludeModules()
+    public List<String> getExcludes()
     {
-        return excludeModules;
+        return excludes;
     }
 
-    public List<String> getShallowExcludeModules()
+    public List<String> getExcludeShallow()
     {
-        return shallowExcludeModules;
+        return excludeShallow;
     }
 
     public OptimizeMojo getOverride()
