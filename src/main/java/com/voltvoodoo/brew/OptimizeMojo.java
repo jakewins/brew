@@ -264,6 +264,4 @@ public class OptimizeMojo extends AbstractMojo {
             FileUtils.copyFile( from, to );
         }
     }
-
-    
 }
