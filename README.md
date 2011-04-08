@@ -35,7 +35,7 @@ Then, add the plugin to your pom:
 
 ### Goal: compile-coffeescript
 
-compile-coffeescript is by default attached to the "compile" phase.
+compile-coffeescript is by default attached to the "process-classes" phase.
 
 compile-coffescript will by default look for coffeescript files (**/*.coffee) 
 recursively in ${basedir}/src/main/coffeescript, and output the compiled js files 
@@ -66,18 +66,25 @@ You can change these two settings by configuration:
 ### Goal: optimize
 
 The "optimize" goal is by default attached to the
-"process-resources" maven phase. "optimize" goal will go through
-all the require modules you have defined, aggregate and minify them,
-and put the result in your output directory.
+"process-classes" maven phase. "optimize" goal will go through
+all the require modules you have defined, aggregate and minify them in a
+build directory of your choosing, and put the resulting minified filed in 
+your output directory.
 
 By default, optimize looks for a js file named "main.js" in 
 ${project.build.outputDirectory}, and puts the resulting main.min.js aggregate
 file in ${project.build.outputDirectory}.
 
-The source and output directories are can be set in your POM:
+The source and output directories can be set in your POM:
 
     <configuration>
+      <!-- Find JS files to work with here -->
       <optimizeSourceDir>${basedir}/my/awesome/directory</optimizeSourceDir>
+      
+      <!-- Copy optimizeSourceDir to here, minify all js and css found -->
+      <optimizeBuildDir>${basedir}/target/somebuildfolder</optimizeBuildDir>
+      
+      <!-- Copy minified js modules to here -->
       <optimizeOutputDir>${basedir}/somewhere</optimizeOutputDir>
     </configuration>
 
@@ -98,6 +105,7 @@ Minimum settings for the "modules" property would be:
     </configuration>
 
 Requirejs-maven supports almost all settings that the requirejs optimization
-tool does. Unfortunately, these are currently not documented properely.
+tool does. Unfortunately, I haven't had time to document them properely.
 
 Until they are, please refer to the java-doc in com.voltvoodoo.brew.OptimizeMojo
+and in com.voltvoodoo.brew.Module
