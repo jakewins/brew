@@ -1,3 +1,5 @@
-1.0
+0.1
 ------------------------
-o Initial release
+ o Require.js support
+ o Coffescript compiler support
+ o Haml compiler support
