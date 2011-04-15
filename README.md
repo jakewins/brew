@@ -1,26 +1,31 @@
-# Brew
+# Brew maven plugin
 
-A maven plugin to brew coffeescript client-side apps. This includes 
-the coffeescript cross-compiler, the require.js optimizer, and a 
-HAML compiler.
+Build javascript apps (optionally using coffeescript) using the CommonJS Asynchronous Module Definition (AMD) 
+pattern to define classes and dependencies between them. See:
+
+http://wiki.commonjs.org/wiki/Modules/AsynchronousDefinition
+
+Brew includes:
+
+ * The require.js "optimizer", which aggregates and minifies AMD-based projects
+ * The coffeescript compiler
+ * The haml-js compiler
+
+### Purpose
+
+Allow building modern javascript applications within organizations that are already invested in
+maven-based build systems and surrounding architecture.
 
 ### Usage
 
-Brew is not yet in maven central, so for now you have to install
-it manually:
-
-    git clone git://github.com/jakewins/brew.git
-    cd brew
-    mvn clean install
-
-Then, add the plugin to your pom:
+Just add the plugin to your pom:
 
     <plugins> 
       ..
       <plugin>
         <groupId>com.voltvoodoo</groupId>
         <artifactId>brew</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>0.1</version>
         <executions>
           <execution>
             <goals>
@@ -48,7 +53,7 @@ You can change these two settings by configuration:
       <plugin>
         <groupId>com.voltvoodoo</groupId>
         <artifactId>brew</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>0.1</version>
         <executions>
           <execution>
             <goals>
@@ -65,10 +70,12 @@ You can change these two settings by configuration:
     
 ### Goal: optimize
 
-The "optimize" goal is by default attached to the
-"process-classes" maven phase. "optimize" goal will go through
-all the require modules you have defined, aggregate and minify them in a
-build directory of your choosing, and put the resulting minified filed in 
+Uses the require.js optimizer to aggregate and minify your project. Dependencies should be 
+defined using the CommonJS Asynchronous Module Definition pattern, see the require.js documentation.
+
+The "optimize" goal is by default attached to the "process-classes" maven phase. It will go through
+all the js modules you have listed in your plugin configuration, interpret the AMD dependencies
+each file has, aggregate and minify that entire dependency tree, and put the resulting minified filed in 
 your output directory.
 
 By default, optimize looks for a js file named "main.js" in 
@@ -104,7 +111,7 @@ Minimum settings for the "modules" property would be:
       </modules>
     </configuration>
 
-Requirejs-maven supports almost all settings that the requirejs optimization
+Brew supports almost all settings that the require.js optimization
 tool does. Unfortunately, I haven't had time to document them properely.
 
 Until they are, please refer to the java-doc in com.voltvoodoo.brew.OptimizeMojo
