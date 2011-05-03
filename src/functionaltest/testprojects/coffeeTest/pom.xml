@@ -54,7 +54,7 @@
 				<executions>
 					<execution>
 						<goals>
-							<goal>compile-coffeescript</goal>
+							<goal>compile</goal>
 						</goals>
 					</execution>
 				</executions>

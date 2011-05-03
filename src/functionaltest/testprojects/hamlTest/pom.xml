@@ -54,7 +54,7 @@
 				<executions>
 					<execution>
 						<goals>
-							<goal>compile-haml</goal>
+							<goal>compile</goal>
 						</goals>
 					</execution>
 				</executions>
