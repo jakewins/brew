@@ -25,12 +25,11 @@ Just add the plugin to your pom:
       <plugin>
         <groupId>com.voltvoodoo</groupId>
         <artifactId>brew</artifactId>
-        <version>0.1</version>
+        <version>0.2.1</version>
         <executions>
           <execution>
             <goals>
-              <goal>compile-coffeescript</goal>
-              <goal>compile-haml</goal>
+              <goal>compile</goal>
               <goal>optimize</goal>
             </goals>
           </execution>
@@ -38,15 +37,23 @@ Just add the plugin to your pom:
       </plugin>
     </plugins>
 
-### Goal: compile-coffeescript
+### Goal: compile
 
-compile-coffeescript is by default attached to the "process-classes" phase.
+compile is by default attached to the "process-classes" phase.
 
-compile-coffescript will by default look for coffeescript files (**/*.coffee) 
+compile will by default look for coffeescript files (**/*.coffee) and haml files (**/*.haml)
 recursively in ${basedir}/src/main/coffeescript, and output the compiled js files 
 into ${project.build.outputDirectory}.
 
-You can change these two settings by configuration:
+You can make the compile goal watch for changes and new coffeescript and haml files, and
+recompile them on the fly. That way, you don't have to re-run your maven build over and over.
+
+To watch for changes, either set "brew.watch" to true:
+
+    mvn brew:compile -Dbrew.watch=true
+
+Or set the "watch" config property to true. Here are the config settings available for the 
+compile goal:
   
     <plugins> 
       ..
@@ -57,13 +64,16 @@ You can change these two settings by configuration:
         <executions>
           <execution>
             <goals>
-              <goal>compile-coffeescript</goal>
+              <goal>compile</goal>
             </goals>
           </execution>
         </executions>
         <configuration>
           <coffeeSourceDir>${basedir}/my/awesome/directory</coffeeSourceDir>
           <coffeeOutputDir>${basedir}/src/main/webapp/js</coffeeOutputDir>
+          <hamlSourceDir>${basedir}/my/awesome/directory</hamlSourceDir>
+          <hamlOutputDir>${basedir}/src/main/webapp/js</hamlOutputDir>
+          <!-- Set this to do auto-compilation when a file is changed <watch>true</watch> -->
         </configuration>
       </plugin>
     </plugins>
