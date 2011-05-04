@@ -103,7 +103,7 @@ public class CompilerMojo extends AbstractMojo
             JCoffeeScriptCompileException, IOException
     {
         FileSetChangeMonitor hamlFiles = new FileSetChangeMonitor(
-                hamlSourceDir, COFFEE_PATTERN );
+                hamlSourceDir, HAML_PATTERN );
         FileSetChangeMonitor coffeeFiles = new FileSetChangeMonitor(
                 coffeeSourceDir, COFFEE_PATTERN );
 
@@ -116,6 +116,7 @@ public class CompilerMojo extends AbstractMojo
                 for ( String file : hamlFiles.getModifiedFilesSinceLastTimeIAsked() )
                 {
                     compileHamlFile( file );
+                    System.out.println("Compiled: " + file);
                 }
 
                 for ( String file : coffeeFiles.getModifiedFilesSinceLastTimeIAsked() )
@@ -123,7 +124,7 @@ public class CompilerMojo extends AbstractMojo
                     try
                     {
                         compileCoffeescriptFile( file );
-
+                        System.out.println("Compiled: " + file);
                     }
                     catch ( JCoffeeScriptCompileException e )
                     {
