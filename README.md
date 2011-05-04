@@ -41,7 +41,7 @@ Just add the plugin to your pom:
 
 compile is by default attached to the "process-classes" phase.
 
-compile will by default look for coffeescript files (**/*.coffee) and haml files (**/*.haml)
+compile will by default look for coffeescript files (\*.coffee) and haml files (\*.haml)
 recursively in ${basedir}/src/main/coffeescript, and output the compiled js files 
 into ${project.build.outputDirectory}.
 
