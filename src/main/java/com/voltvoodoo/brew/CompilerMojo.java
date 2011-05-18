@@ -74,7 +74,15 @@ public class CompilerMojo extends AbstractMojo
 
             for ( String relativePath : getCoffeeScriptsRelativePaths() )
             {
-                compileCoffeescriptFile( relativePath );
+                try
+                {
+                    compileCoffeescriptFile( relativePath );
+                }
+                catch ( JCoffeeScriptCompileException e )
+                {
+                    getLog().error( "[" + relativePath + "]: " + e.getMessage() );
+                    throw e;
+                }
             }
 
             for ( String relativePath : getHamlRelativePaths() )
@@ -116,7 +124,7 @@ public class CompilerMojo extends AbstractMojo
                 for ( String file : hamlFiles.getModifiedFilesSinceLastTimeIAsked() )
                 {
                     compileHamlFile( file );
-                    System.out.println("Compiled: " + file);
+                    System.out.println("[" + file + "]: Compiled");
                 }
 
                 for ( String file : coffeeFiles.getModifiedFilesSinceLastTimeIAsked() )
@@ -124,11 +132,11 @@ public class CompilerMojo extends AbstractMojo
                     try
                     {
                         compileCoffeescriptFile( file );
-                        System.out.println("Compiled: " + file);
+                        System.out.println("[" + file + "]: Compiled");
                     }
                     catch ( JCoffeeScriptCompileException e )
                     {
-                        getLog().error( "Compile error: " + e.getMessage() );
+                        getLog().error( "[" + file + "]: " + e.getMessage() );
                     }
                 }
 
