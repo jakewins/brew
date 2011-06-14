@@ -38,6 +38,16 @@ public class CompilerMojo extends AbstractMojo
      * @parameter expression="${project.build.outputDirectory}"
      */
     private File hamlOutputDir;
+    
+    /**
+     * @parameter expression="${project.build.outputDirectory}"
+     */
+    private File moduleConversionSourceDir;
+
+    /**
+     * @parameter expression="${project.build.outputDirectory}"
+     */
+    private File moduleConversionOutputDir;
 
     /**
      * Javascript source directory.
@@ -60,7 +70,22 @@ public class CompilerMojo extends AbstractMojo
      */
     private boolean watch = false;
 
+    /**
+     * Optional suffix to add before ".js" on files that
+     * have been converted from commonjs modules to AMD modules.
+     * 
+     * Default is ".amd", resulting in files like "myfile.amd.js".
+     * 
+     * If you leave this empty, and keep module conversion input
+     * and output directories the same, behaviour will be to
+     * overwrite the commonjs module files with amd module files.
+     * 
+     * @parameter expression=".amd"
+     */
+    private String amdModuleSuffix;
+
     private HamlCompiler hamlCompiler;
+    private CommonModuleToAmdConverter moduleConverter;
     private JCoffeeScriptCompiler coffeeCompiler;
 
     public void execute() throws MojoExecutionException
@@ -69,6 +94,7 @@ public class CompilerMojo extends AbstractMojo
         {
 
             hamlCompiler = new HamlCompiler();
+            moduleConverter = new CommonModuleToAmdConverter();
             coffeeCompiler = new JCoffeeScriptCompiler(
                     new LinkedList<Option>() );
 
@@ -170,6 +196,26 @@ public class CompilerMojo extends AbstractMojo
         IOUtil.copy( compiled, out );
 
         in.close();
+        out.close();
+    }
+    
+    private void convertFromCommonModuleToAMD( String relativePath ) throws IOException {
+        String relativeAmdPath = relativePath.substring( 0, relativePath.lastIndexOf( '.' ) ) + amdModuleSuffix + ".js";
+        
+        File commonFile = new File( moduleConversionSourceDir, relativePath ).getAbsoluteFile();
+        File amdFile = new File( moduleConversionOutputDir, relativeAmdPath ).getAbsoluteFile();
+        
+        String converted = moduleConverter.convert( commonFile.getAbsolutePath() );
+        
+        if(amdFile.exists()) {
+            amdFile.delete();
+        }
+
+        amdFile.getParentFile().mkdirs();
+        amdFile.createNewFile();
+        
+        FileOutputStream out = new FileOutputStream( amdFile );
+        IOUtil.copy( converted, out );
         out.close();
     }
 

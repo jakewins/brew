@@ -67,6 +67,8 @@ import org.mozilla.javascript.WrappedException;
  */
 public class RhinoRunner extends ScriptableObject {
 
+    // TODO: Kill this in favor of the much simpler JSRunner class
+    
     private static final long serialVersionUID = 3859222870741981547L;
 
     @Override
