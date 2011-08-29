@@ -16,27 +16,27 @@ import org.codehaus.plexus.util.FileUtils;
 import org.mozilla.javascript.ErrorReporter;
 
 /**
- * 
+ *
  * @goal optimize
  * @phase process-classes
- * 
+ *
  */
 public class OptimizeMojo extends AbstractMojo {
 
     /**
-     * Javascript source directory. 
+     * Javascript source directory.
      *
      * @parameter expression="${project.build.outputDirectory}"
      */
     private File optimizeSourceDir;
-    
+
     /**
      * Source tree is copied here, minified and aggregated.
      *
      * @parameter expression="${project.build.outputDirectory}"
      */
     private File optimizeBuildDir;
-    
+
     /**
      * Built modules are put here, moved from the build directory after
      * minification and aggregation. By default this is the same as the
@@ -45,14 +45,14 @@ public class OptimizeMojo extends AbstractMojo {
      * @parameter expression="${project.build.outputDirectory}"
      */
     private File optimizeOutputDir;
-    
+
     /**
-     * File name suffix for optimized modules. 
-     * 
+     * File name suffix for optimized modules.
+     *
      * @parameter expression="-min"
      */
     private String optimizedFileNameSuffix;
-    
+
     /**
      * Used to inline i18n resources into the built file. If no locale
      * is specified, i18n resources will not be inlined. Only one locale
@@ -62,7 +62,7 @@ public class OptimizeMojo extends AbstractMojo {
      * @parameter expression="${requirejs.locale}" default="en-us"
      */
     private String locale = "en-us";
-    
+
     /**
      * How to optimize all the JS files in the build output directory.
      * Right now only the following values
@@ -76,7 +76,7 @@ public class OptimizeMojo extends AbstractMojo {
      * @parameter expression="${requirejs.jsOptimizer}" default="uglify"
      */
     private String jsOptimizer = "uglify";
-    
+
     /**
      * Allow CSS optimizations. Allowed values:
      * - "standard": @import inlining, comment removal and line returns.
@@ -87,16 +87,22 @@ public class OptimizeMojo extends AbstractMojo {
      * @parameter expression="${requirejs.cssOptimizer}" default="standard"
      */
     private String cssOptimizer = "standard";
-    
+
     /**
      * If optimizeCss is in use, a list of of files to ignore for the @import
      * inlining. The value of this option should be a comma separated list
      * of CSS file names to ignore. The file names should match whatever
      * strings are used in the @import calls.
-     * @parameter 
+     * @parameter
      */
     private List<String> cssExcludes;
-    
+
+    /**
+     * If includeRequire is specified on a module, then import require.js from
+     * the specified resource.
+     * @parameter expression="${requirejs.requireUrl}" default=false
+     */
+    private String requireUrl = "require.js";
 
     /**
      * Inlines the text for any text! dependencies, to avoid the separate
@@ -104,7 +110,7 @@ public class OptimizeMojo extends AbstractMojo {
      * @parameter expression="${requirejs.inlineText}" default=true
      */
     private boolean inlineText = true;
-    
+
     /**
      * Allow "use strict"; be included in the RequireJS files.
      * Default is false because there are not many browsers that can properly
@@ -113,7 +119,7 @@ public class OptimizeMojo extends AbstractMojo {
      * @parameter expression="${requirejs.useStrictJs}" default=false
      */
     private boolean useStrictJs = false;
-    
+
     /**
      * Specify build pragmas. If the source files contain comments like so:
      * >>excludeStart("fooExclude", pragmas.fooExclude);
@@ -126,13 +132,13 @@ public class OptimizeMojo extends AbstractMojo {
      * @parameter
      */
     private Map<String, Boolean> pragmas;
-    
+
     /**
      * Skip processing for pragmas.
      * @parameter expression="${requirejs.skipPragmas}" default=false
      */
     private boolean skipPragmas = false;
-    
+
     /**
      * If skipModuleInsertion is false, then files that do not use require.def
      * to define modules will get a require.def() placeholder inserted for them.
@@ -144,14 +150,14 @@ public class OptimizeMojo extends AbstractMojo {
      * @parameter expression="${requirejs.skipModuleInsertion}" default=false
      */
     private boolean skipModuleInsertion = false;
-    
+
     /**
      * Shorthand for specifying a single module to compile.
      * This will be overriden if you use the {@link #modules} parameter.
      * @parameter expression="${requirejs.module}" default="main"
      */
     private String module = "main";
-    
+
     /**
      * List the modules that will be optimized. All their immediate and deep
      * dependencies will be included in the module's file when the build is
@@ -163,20 +169,20 @@ public class OptimizeMojo extends AbstractMojo {
 
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
-          
+
             Optimizer builder = new Optimizer();
             ErrorReporter reporter = new DefaultErrorReporter(getLog(), true);
-            
+
             builder.build( optimizeSourceDir, createBuildProfile(), reporter );
             moveModulesToOutputDir();
-            
+
         } catch (RuntimeException exc) {
             throw exc;
         } catch (Exception exc) {
             throw new MojoExecutionException(exc.getMessage(), exc);
         }
     }
-    
+
     public File getBaseUrl()
     {
         return optimizeSourceDir;
@@ -190,6 +196,11 @@ public class OptimizeMojo extends AbstractMojo {
     public String getLocale()
     {
         return locale;
+    }
+
+    public String getRequireUrl()
+    {
+        return requireUrl;
     }
 
     public String getOptimize()
@@ -216,11 +227,11 @@ public class OptimizeMojo extends AbstractMojo {
     {
         return skipPragmas;
     }
-    
+
     public Map<String, Boolean> getPragmas() {
         return pragmas;
     }
-    
+
     public List<String> getCssImportIgnore() {
         return cssExcludes;
     }
@@ -229,7 +240,7 @@ public class OptimizeMojo extends AbstractMojo {
     {
         return skipModuleInsertion;
     }
-    
+
     public List<Module> getModules() {
         if(modules == null) {
             modules = new ArrayList<Module>();
@@ -242,20 +253,20 @@ public class OptimizeMojo extends AbstractMojo {
     public Log getLog() {
         return super.getLog();
     }
-    
+
     @SuppressWarnings( "rawtypes" )
     @JsonIgnore
     public Map getPluginContext() {
         return super.getPluginContext();
     }
-    
+
     private File createBuildProfile() throws IOException {
         File profileFile = File.createTempFile( "profile", "js" );
         ObjectMapper mapper = new ObjectMapper();
         mapper.writeValue( profileFile, this );
         return profileFile;
     }
-    
+
     private void moveModulesToOutputDir() throws IOException {
         File from, to;
         for(Module mod : getModules() ) {
