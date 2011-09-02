@@ -24,7 +24,7 @@ public class CommonModuleToAmdConverterTest
         
         File moduleFile = getCommonModuleFile();
         
-        String result = converter.convert(moduleFile.getAbsolutePath());
+        String result = converter.convert(moduleFile.getAbsolutePath()).trim();
         
         assertEquals(expectedAmdOutput, result);
     }
