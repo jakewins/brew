@@ -244,6 +244,9 @@ function (lang,   logger,   envOptimize,        file,           uglify) {
                 } catch (e) {
                     logger.error('Cannot uglify file: ' + fileName + '. Skipping it. Error is:\n' + e.toString());
                 }
+                // Uglify removes all trailing semicolons from our javascripts files (see https://github.com/mishoo/UglifyJS/issues/126).
+                // We need to insert them again, so that the semantics of our concatenated file stays right.
+                fileContents += ";"
                 return fileContents;
             }
         }
