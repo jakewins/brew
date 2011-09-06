@@ -20,7 +20,7 @@ public class HamlCompiler extends JSRunner
     {
         Map<String, Object> vars = new HashMap<String, Object>();
         vars.put("hamlSource", haml);
-            
+        
         return addModuleDefinition(evalString("Haml.optimize(Haml.compile(hamlSource));","HamlCompiler", vars));        
     }
     

@@ -15,6 +15,7 @@ import org.codehaus.plexus.util.IOUtil;
 import org.jcoffeescript.JCoffeeScriptCompileException;
 import org.jcoffeescript.JCoffeeScriptCompiler;
 import org.jcoffeescript.Option;
+import org.mozilla.javascript.JavaScriptException;
 
 /**
  * 
@@ -113,7 +114,12 @@ public class CompilerMojo extends AbstractMojo
 
             for ( String relativePath : getHamlRelativePaths() )
             {
-                compileHamlFile( relativePath );
+                try {
+                    compileHamlFile( relativePath );
+                } catch(JavaScriptException e) {
+                    getLog().error( "[" + relativePath + "]: " + e.getMessage() );
+                    throw e;
+                }
             }
 
             if ( watch )
@@ -149,8 +155,12 @@ public class CompilerMojo extends AbstractMojo
 
                 for ( String file : hamlFiles.getModifiedFilesSinceLastTimeIAsked() )
                 {
-                    compileHamlFile( file );
-                    System.out.println("[" + file + "]: Compiled");
+                    try {
+                        compileHamlFile( file);
+                        System.out.println("[" + file + "]: Compiled");
+                    } catch(JavaScriptException e) {
+                        getLog().error( "[" + file + "]: " + e.getMessage() );
+                    }
                 }
 
                 for ( String file : coffeeFiles.getModifiedFilesSinceLastTimeIAsked() )
