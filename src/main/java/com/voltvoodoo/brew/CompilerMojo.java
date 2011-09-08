@@ -84,6 +84,9 @@ public class CompilerMojo extends AbstractMojo
      */
     private String amdModuleSuffix;
 
+
+
+
     private HamlCompiler hamlCompiler;
     private Optimizer moduleConverter;
     private JCoffeeScriptCompiler coffeeCompiler;

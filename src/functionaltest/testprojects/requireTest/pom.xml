@@ -61,6 +61,7 @@
 
 				<configuration>
 					<optimizeSourceDir>${basedir}/src/main/javascript</optimizeSourceDir>
+                    <providePlugins>true</providePlugins>
 				</configuration>
 			</plugin>
 		</plugins>
