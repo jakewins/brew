@@ -34,4 +34,19 @@ public class Wrap {
      */
     private String endFile;
 
+    public String getStart() {
+        return start;
+    }
+
+    public String getEnd() {
+        return end;
+    }
+
+    public String getStartFile() {
+        return startFile;
+    }
+
+    public String getEndFile() {
+        return endFile;
+    }
 }

@@ -415,6 +415,8 @@ public class OptimizeMojo extends AbstractMojo {
         ObjectMapper mapper = new ObjectMapper();
         mapper.getSerializationConfig().setSerializationInclusion(JsonSerialize.Inclusion.NON_NULL);
         mapper.writeValue( profileFile, this );
+        System.out.println("----------------");
+        mapper.writeValue(System.out, this);
         return profileFile;
     }
 

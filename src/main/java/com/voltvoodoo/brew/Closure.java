@@ -18,4 +18,16 @@ public class Closure {
      * @parameter default-value="WARNING"
      */
     private String loggingLevel = "WARNING";
+
+    public Map<String, String> getCompilerOptions() {
+        return CompilerOptions;
+    }
+
+    public String getCompilationLevel() {
+        return CompilationLevel;
+    }
+
+    public String getLoggingLevel() {
+        return loggingLevel;
+    }
 }
