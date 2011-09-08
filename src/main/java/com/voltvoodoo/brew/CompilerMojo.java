@@ -85,7 +85,7 @@ public class CompilerMojo extends AbstractMojo
     private String amdModuleSuffix;
 
     private HamlCompiler hamlCompiler;
-    private CommonModuleToAmdConverter moduleConverter;
+    private Optimizer moduleConverter;
     private JCoffeeScriptCompiler coffeeCompiler;
 
     public void execute() throws MojoExecutionException
@@ -94,7 +94,7 @@ public class CompilerMojo extends AbstractMojo
         {
 
             hamlCompiler = new HamlCompiler();
-            moduleConverter = new CommonModuleToAmdConverter();
+            moduleConverter = new Optimizer();
             coffeeCompiler = new JCoffeeScriptCompiler(
                     new LinkedList<Option>() );
 
@@ -198,25 +198,13 @@ public class CompilerMojo extends AbstractMojo
         in.close();
         out.close();
     }
-    
+
     private void convertFromCommonModuleToAMD( String relativePath ) throws IOException {
         String relativeAmdPath = relativePath.substring( 0, relativePath.lastIndexOf( '.' ) ) + amdModuleSuffix + ".js";
-        
+
         File commonFile = new File( moduleConversionSourceDir, relativePath ).getAbsoluteFile();
         File amdFile = new File( moduleConversionOutputDir, relativeAmdPath ).getAbsoluteFile();
-        
-        String converted = moduleConverter.convert( commonFile.getAbsolutePath() );
-        
-        if(amdFile.exists()) {
-            amdFile.delete();
-        }
-
-        amdFile.getParentFile().mkdirs();
-        amdFile.createNewFile();
-        
-        FileOutputStream out = new FileOutputStream( amdFile );
-        IOUtil.copy( converted, out );
-        out.close();
+        moduleConverter.convertCommonJsModulesToAmdModules(commonFile, amdFile, new DefaultErrorReporter(getLog(), true));
     }
 
     private void compileHamlFile( String relativePath ) throws IOException

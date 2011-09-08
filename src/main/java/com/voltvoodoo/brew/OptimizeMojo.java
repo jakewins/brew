@@ -22,7 +22,6 @@ import org.mozilla.javascript.ErrorReporter;
  *
  */
 public class OptimizeMojo extends AbstractMojo {
-
     /**
      * Javascript source directory.
      *
@@ -167,13 +166,18 @@ public class OptimizeMojo extends AbstractMojo {
      */
     private List<Module> modules;
 
+    /**
+     * Defines whether the default requirejs plugins text, order and i18n should
+     * be copied to the working directory.
+     */
+    private boolean providePlugins = true;
+
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
 
             Optimizer builder = new Optimizer();
             ErrorReporter reporter = new DefaultErrorReporter(getLog(), true);
-
-            builder.build( optimizeSourceDir, createBuildProfile(), reporter );
+            builder.build( optimizeBuildDir, providePlugins, createBuildProfile(), reporter );
             moveModulesToOutputDir();
 
         } catch (RuntimeException exc) {

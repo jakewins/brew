@@ -6,8 +6,8 @@ import java.util.Map;
 
 public class HamlCompiler extends JSRunner
 {
-    private static final String hamlClasspathFilename = "/haml.js";
-    private static final String jsonClasspathFilename = "/json2.js";
+    private static final String hamlClasspathFilename = "/haml/haml.js";
+    private static final String jsonClasspathFilename = "/haml/json2.js";
     
     public HamlCompiler() throws IOException
     {
