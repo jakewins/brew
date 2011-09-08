@@ -3,6 +3,7 @@ package com.voltvoodoo.brew;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -12,6 +13,8 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.SerializationConfig;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.plexus.util.FileUtils;
 import org.mozilla.javascript.ErrorReporter;
 
@@ -22,7 +25,6 @@ import org.mozilla.javascript.ErrorReporter;
  *
  */
 public class OptimizeMojo extends AbstractMojo {
-
     /**
      * Javascript source directory.
      *
@@ -140,14 +142,14 @@ public class OptimizeMojo extends AbstractMojo {
     private boolean skipPragmas = false;
 
     /**
-     * If skipModuleInsertion is false, then files that do not use require.def
-     * to define modules will get a require.def() placeholder inserted for them.
+     * If skipModuleInsertion is false, then files that do not use define()
+     * to define modules will get a define() placeholder inserted for them
      * Also, require.pause/resume calls will be inserted.
      * Set it to true to avoid this. This is useful if you are building code that
      * does not use require() in the built project or in the JS files, but you
      * still want to use the optimization tool from RequireJS to concatenate modules
      * together.
-     * @parameter expression="${requirejs.skipModuleInsertion}" default=false
+     * @parameter default-value=false
      */
     private boolean skipModuleInsertion = false;
 
@@ -167,13 +169,119 @@ public class OptimizeMojo extends AbstractMojo {
      */
     private List<Module> modules;
 
+
+    /**
+     * Set paths for modules. If relative paths, set relative to baseUrl above.
+     * If a special value of "empty:" is used for the path value, then that
+     * acts like mapping the path to an empty file. It allows the optimizer to
+     * resolve the dependency to path, but then does not include it in the output.
+     * Useful to map module names that are to resources on a CDN or other
+     * http: URL when running in the browser and during an optimization that
+     * file should be skipped because it has no dependencies.
+     * @parameter
+    */
+    private Map<String, String> paths;
+
+    /**
+     * Configure CommonJS packages. See http://requirejs.org/docs/api.html#packages
+     * @parameter
+     */
+    private Map<String, List<String>> packagePaths;
+    /**
+     * @parameter
+     */
+    private List<String> packages;
+
+    /**
+     * If using UglifyJS for script optimization, these config options can be
+     * used to pass configuration values to UglifyJS.
+     * See https://github.com/mishoo/UglifyJS for the possible values.
+     * @parameter
+     */
+    private Uglify uglify;
+
+    /**
+     * If using Closure Compiler for script optimization, these config options
+     * can be used to configure Closure Compiler. See the documentation for
+     * Closure compiler for more information.
+     * @parameter
+     */
+    private Closure closure;
+
+    /**
+     * Same as "pragmas", but only applied once during the file save phase
+     * of an optimization. "pragmas" are applied both during the dependency
+     * mapping and file saving phases on an optimization. Some pragmas
+     * should not be processed during the dependency mapping phase of an
+     * operation, such as the pragma in the CoffeeScript loader plugin,
+     * which wants the CoffeeScript compiler during the dependency mapping
+     * phase, but once files are saved as plain JavaScript, the CoffeeScript
+     * compiler is no longer needed. In that case, pragmasOnSave would be used
+     * to exclude the compiler code during the save phase.
+     * @parameter
+     */
+    private Map<String, Boolean> pragmasOnSave;
+
+    /**
+     * Allows trimming of code branches that use has.js-based feature detection:
+     * https://github.com/phiggins42/has.js
+     * The code branch trimming only happens if minification with UglifyJS or
+     * Closure Compiler is done. For more information, see:
+     * http://requirejs.org/docs/optimization.html#hasjs
+     * @parameter
+     */
+    private Map<String, Boolean> has;
+
+    /**
+     * Similar to pragmasOnSave, but for has tests -- only applied during the
+     * file save phase of optimization, where "has" is applied to both
+     * dependency mapping and file save phases.
+     * @parameter
+     */
+    private Map<String, Boolean> hasOnSave;
+
+    /**
+     * Allows namespacing requirejs, require and define calls to a new name.
+     * This allows stronger assurances of getting a module space that will
+     * not interfere with others using a define/require AMD-based module
+     * system. The example below will rename define() calls to foo.define().
+     * See http://requirejs.org/docs/faq-advanced.html#rename for a more
+     * complete example.
+     * @parameter
+     */
+    private String namespace;
+
+    /**
+     * If it is not a one file optimization, scan through all .js files in the
+     * output directory for any plugin resource dependencies, and if the plugin
+     * supports optimizing them as separate files, optimize them. Can be a
+     * slower optimization. Only use if there are some plugins that use things
+     * like XMLHttpRequest that do not work across domains, but the built code
+     * will be placed on another domain.
+     * @parameter default-value=false
+     */
+    private boolean optimizeAllPluginResources;
+
+
+    /**
+     * Wrap any build layer in a start and end text specified by wrap.
+     * @parameter
+     */
+    private Wrap wrap;
+
+    /**
+     * Defines whether the default requirejs plugins text, order and i18n should
+     * be copied to the working directory.
+     * @parameter default-value=false
+     */
+    private boolean providePlugins = false;
+
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
 
             Optimizer builder = new Optimizer();
             ErrorReporter reporter = new DefaultErrorReporter(getLog(), true);
-
-            builder.build( optimizeSourceDir, createBuildProfile(), reporter );
+            builder.build( optimizeBuildDir, providePlugins, createBuildProfile(), reporter );
             moveModulesToOutputDir();
 
         } catch (RuntimeException exc) {
@@ -248,6 +356,48 @@ public class OptimizeMojo extends AbstractMojo {
         }
         return modules;
     }
+    public Map<String, String> getPaths() {
+        return paths;
+    }
+
+    public Map<String, List<String>> getPackagePaths() {
+        return packagePaths;
+    }
+
+    public List<String> getPackages() {
+        return packages;
+    }
+
+    public Uglify getUglify() {
+        return uglify;
+    }
+
+    public Closure getClosure() {
+        return closure;
+    }
+    public Map<String, Boolean> getPragmasOnSave() {
+        return pragmasOnSave;
+    }
+
+    public Map<String, Boolean> getHas() {
+        return has;
+    }
+
+    public Map<String, Boolean> getHasOnSave() {
+        return hasOnSave;
+    }
+
+    public String getNamespace() {
+        return namespace;
+    }
+
+    public boolean isOptimizeAllPluginResources() {
+        return optimizeAllPluginResources;
+    }
+
+    public Wrap getWrap() {
+        return wrap;
+    }
 
     @JsonIgnore
     public Log getLog() {
@@ -263,6 +413,7 @@ public class OptimizeMojo extends AbstractMojo {
     private File createBuildProfile() throws IOException {
         File profileFile = File.createTempFile( "profile", "js" );
         ObjectMapper mapper = new ObjectMapper();
+        mapper.getSerializationConfig().setSerializationInclusion(JsonSerialize.Inclusion.NON_NULL);
         mapper.writeValue( profileFile, this );
         return profileFile;
     }

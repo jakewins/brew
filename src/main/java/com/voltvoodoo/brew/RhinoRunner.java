@@ -113,7 +113,7 @@ public class RhinoRunner extends ScriptableObject {
             for(String key : globalVariables.keySet()) {
                 runner.defineProperty(key, globalVariables.get( key ), ScriptableObject.DONTENUM);
             }
-            
+
             runner.processSource(cx, mainScript);
         } finally {
             Context.exit();

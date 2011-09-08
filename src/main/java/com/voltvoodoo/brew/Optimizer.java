@@ -14,58 +14,57 @@ import org.mozilla.javascript.ErrorReporter;
 public class Optimizer
 {
 
-    private static final String buildScriptClasspathFilename = "/buildScript.js";
-    private static final String requireJsClasspathFilename = "/require.js";
-    private static final String rhinoAdaptorClasspathFilename = "/rhinoAdaptor.js";
-    
-    private final String[] requirePlugins = {"i18n.js", "order.js", "text.js"};
-    
+
+    private static final String[] requirePlugins = {"i18n.js", "order.js", "text.js"};
+
+    private static final String buildScriptClasspathFilename = "/r.js";
+
     private File buildScript;
-    private File requireJs;
-    private File rhinoAdaptor;
-    
+
 
     public Optimizer() throws IOException
     {
         buildScript = File.createTempFile( "build", "js" );
-        requireJs = File.createTempFile( "require", "js" );
-        rhinoAdaptor = File.createTempFile( "rhinoAdaptor", "js" );
-        
+
         copyFileFromClassPathToFilesystem( buildScriptClasspathFilename,
                 buildScript );
-        copyFileFromClassPathToFilesystem(requireJsClasspathFilename,
-                requireJs );
-        copyFileFromClassPathToFilesystem( rhinoAdaptorClasspathFilename,
-                rhinoAdaptor );
-        
+
         buildScript.deleteOnExit();
-        requireJs.deleteOnExit();
-        rhinoAdaptor.deleteOnExit();
     }
 
-    public void build( File projectDir, File buildProfile, ErrorReporter reporter ) throws IOException
+    public void convertCommonJsModulesToAmdModules( File inputFile, File outputFile, ErrorReporter reporter ) throws IOException
+    {
+
+        String[] includes = new String[0];
+
+        String[] args = new String[3];
+        args[0] = "-v";
+        args[1] = inputFile.getAbsolutePath();
+        args[2] = outputFile.getAbsolutePath();
+
+        Map<String, Object> globalVariables = new HashMap<String, Object>();
+
+        RhinoRunner.exec(includes, buildScript.getAbsolutePath(), args, globalVariables, reporter);
+    }
+
+    public void build( File buildDir, boolean providePlugins, File buildProfile, ErrorReporter reporter ) throws IOException
     {
         
         // Move require deps into project dir temporarily.
         // These can not be loaded from classpath, because
         // require.js assumes these will be intermingled with the
         // raw source files we are compiling.
-        putRequirePluginsIn(projectDir);
+        putRequirePluginsIn(buildDir);
         
-        String[] includes = new String[2];
-        includes[0] = requireJs.getAbsolutePath();
-        includes[1] = rhinoAdaptor.getAbsolutePath();
-        
+        String[] includes = new String[0];
+
         String[] args = new String[2];
-        args[0] = projectDir.getAbsolutePath();
+        args[0] = "-o";
         args[1] = buildProfile.getAbsolutePath();
-        
+
         Map<String, Object> globalVariables = new HashMap<String, Object>();
         
         RhinoRunner.exec(includes, buildScript.getAbsolutePath(), args, globalVariables, reporter);
-        
-        
-        removeRequirePluginsFrom(projectDir);
     }
 
     private File copyFileFromClassPathToFilesystem( String classpathFilename,
@@ -87,22 +86,15 @@ public class Optimizer
 
         return outputFile;
     }
-    
-    private void putRequirePluginsIn(File folder) throws IOException {
-        File pluginsFolder = new File(folder, "require");
+
+    private void putRequirePluginsIn(File buildDir) throws IOException {
         File outputFile;
-        pluginsFolder.mkdirs();
+        buildDir.mkdirs();
         for(String plugin : requirePlugins) {
-            outputFile = new File(pluginsFolder, plugin);
+            outputFile = new File(buildDir, plugin);
             copyFileFromClassPathToFilesystem( "/require/" + plugin, outputFile );
         }
     }
-    
-    private void removeRequirePluginsFrom(File folder) throws IOException {
-        File pluginsFolder = new File(folder, "require");
-        if(pluginsFolder.exists()) {
-            FileUtils.deleteDirectory( pluginsFolder );
-        }
-    }
+
 
 }
