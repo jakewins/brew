@@ -5,7 +5,6 @@ import static org.junit.Assert.assertEquals;
 import java.io.*;
 import java.util.logging.Logger;
 
-import org.apache.tools.ant.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -16,10 +15,6 @@ public class CommonModuleToAmdConverterTest
 {
 
     private static final Logger LOG = Logger.getLogger(CommonModuleToAmdConverterTest.class.getSimpleName());
-
-    private static final String commonModuleFile =
-        "var x = require(\"x\");" +
-        "alert(x);";
     
     private static final String expectedAmdOutput = "define([\"require\", \"exports\", \"module\", \"x\"], function(require, exports, module) {\nvar x = require(\"x\");alert(x);\n});";
 
@@ -53,14 +48,6 @@ public class CommonModuleToAmdConverterTest
         } catch (Exception exc) {
             throw new RuntimeException("wrap: " + exc.getMessage(), exc);
         }
-    }
-
-    private File getCommonModuleFile() throws IOException {
-        File moduleFile = File.createTempFile( "commonModule", "js" );
-        FileWriter writer = new FileWriter(moduleFile);
-        writer.write( commonModuleFile );
-        writer.close();
-        return moduleFile;
     }
     
 }

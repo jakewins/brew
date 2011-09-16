@@ -13,8 +13,6 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.SerializationConfig;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.plexus.util.FileUtils;
 import org.mozilla.javascript.ErrorReporter;
 
@@ -180,7 +178,7 @@ public class OptimizeMojo extends AbstractMojo {
      * file should be skipped because it has no dependencies.
      * @parameter
     */
-    private Map<String, String> paths;
+    private Map<String, String> paths = Collections.emptyMap();
 
     /**
      * Configure CommonJS packages. See http://requirejs.org/docs/api.html#packages
@@ -291,9 +289,9 @@ public class OptimizeMojo extends AbstractMojo {
         }
     }
 
-    public File getBaseUrl()
+    public String getBaseUrl()
     {
-        return optimizeSourceDir;
+        return optimizeSourceDir.getAbsolutePath();
     }
 
     public File getDir()
@@ -413,8 +411,8 @@ public class OptimizeMojo extends AbstractMojo {
     private File createBuildProfile() throws IOException {
         File profileFile = File.createTempFile( "profile", "js" );
         ObjectMapper mapper = new ObjectMapper();
-        mapper.getSerializationConfig().setSerializationInclusion(JsonSerialize.Inclusion.NON_NULL);
         mapper.writeValue( profileFile, this );
+        mapper.writeValue( new File("/tmp/buh.js"), this );
         return profileFile;
     }
 
