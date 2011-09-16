@@ -10,7 +10,7 @@
 	<groupId>com.voltvoodoo</groupId>
 	<artifactId>brew</artifactId>
 	<name>Brew</name>
-	<version>0.2.3-SNAPSHOT</version>
+	<version>0.2.3</version>
 	<packaging>maven-plugin</packaging>
 
 	<url>http://github.com/jakewins/brew</url>
