@@ -30,7 +30,8 @@ public class HamlCompiler extends JSRunner
         		    "with(vars||{}) {\n" +
                       "return " + script + "; \n"+
                     "}};\n"+
-                  "})(typeof define==\"function\"?\n"+
+                  "})" +
+                ";})(typeof define==\"function\"?\n"+
                     "define:\n"+
                     "function(factory){module.exports=factory.apply(this, deps.map(require));});\n";
     }
