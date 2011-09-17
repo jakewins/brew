@@ -412,7 +412,6 @@ public class OptimizeMojo extends AbstractMojo {
         File profileFile = File.createTempFile( "profile", "js" );
         ObjectMapper mapper = new ObjectMapper();
         mapper.writeValue( profileFile, this );
-        mapper.writeValue( new File("/tmp/buh.js"), this );
         return profileFile;
     }
 
