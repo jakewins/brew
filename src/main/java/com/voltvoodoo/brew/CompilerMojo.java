@@ -4,9 +4,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.LinkedList;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -29,6 +32,8 @@ public class CompilerMojo extends AbstractMojo
     private static final String COFFEE_PATTERN = "**/*.coffee";
 
     private static final String HAML_PATTERN = "**/*.haml";
+
+    private static final String ANY_PATTERN = "**/*";
 
     /**
      * @parameter expression="${basedir}/src/main/coffeescript"
@@ -63,6 +68,21 @@ public class CompilerMojo extends AbstractMojo
      * @parameter expression="${project.build.outputDirectory}"
      */
     private File coffeeOutputDir;
+    
+    /**
+     * Used only by the watch option. Files in this directory
+     * are watched for changes and copied on the fly over to 
+     * {@link #resourceOutputDir}.
+     * @parameter expression="${basedir}/src/main/resources"
+     */
+    private File resourceSourceDir;
+    
+    /**
+     * Output for watched resources.
+     * 
+     * @parameter expression="${project.build.outputDirectory}"
+     */
+    private File resourceOutputDir;
 
     /**
      * Set to true to watch for changes to files and re-compile them on the fly.
@@ -146,6 +166,8 @@ public class CompilerMojo extends AbstractMojo
                 hamlSourceDir, HAML_PATTERN );
         FileSetChangeMonitor coffeeFiles = new FileSetChangeMonitor(
                 coffeeSourceDir, COFFEE_PATTERN );
+        FileSetChangeMonitor resourceFiles = new FileSetChangeMonitor(
+                resourceSourceDir, ANY_PATTERN );
 
         try
         {
@@ -158,7 +180,7 @@ public class CompilerMojo extends AbstractMojo
                     try {
                         compileHamlFile( file);
                         System.out.println("[" + file + "]: Compiled");
-                    } catch(JavaScriptException e) {
+                    } catch(Exception e) {
                         getLog().error( "[" + file + "]: " + e.getMessage() );
                     }
                 }
@@ -170,7 +192,34 @@ public class CompilerMojo extends AbstractMojo
                         compileCoffeescriptFile( file );
                         System.out.println("[" + file + "]: Compiled");
                     }
-                    catch ( JCoffeeScriptCompileException e )
+                    catch ( Exception e )
+                    {
+                        getLog().error( "[" + file + "]: " + e.getMessage() );
+                    }
+                }
+
+                for ( String file : resourceFiles.getModifiedFilesSinceLastTimeIAsked() )
+                {
+                    try
+                    {
+                        File source = new File(resourceSourceDir, file);
+                        File target = new File(resourceOutputDir, file);
+                        FileReader sourceReader = null;
+                        FileWriter targetWriter = null;
+                        try {
+                            sourceReader = new FileReader(source);
+                            targetWriter = new FileWriter(target);
+                            
+                            IOUtils.copy(sourceReader, targetWriter);
+                            System.out.println("[" + file + "]: Copied to output dir");
+                        } finally {
+                            if(sourceReader != null)
+                                sourceReader.close();
+                            if(targetWriter != null)
+                                targetWriter.close();
+                        }
+                    }
+                    catch ( Exception e )
                     {
                         getLog().error( "[" + file + "]: " + e.getMessage() );
                     }
