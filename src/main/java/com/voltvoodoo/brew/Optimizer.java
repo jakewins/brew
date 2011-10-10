@@ -14,7 +14,7 @@ public class Optimizer
 {
 
 
-    private static final String[] requirePlugins = {"i18n.js", "order.js", "text.js"};
+    private static final String[] requirePlugins = {"i18n.js", "order.js", "text.js", "domReady.js", "cs.js"};
 
     private static final String buildScriptClasspathFilename = "/r.js";
 
