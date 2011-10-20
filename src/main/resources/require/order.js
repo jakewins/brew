@@ -164,8 +164,15 @@
                 //so that subsequent addition of a real type="text/javascript"
                 //tag will cause the scripts to be executed immediately in the
                 //correct order.
-                if (req.specified(name)) {
-                    req([name], onLoad);
+                if (req.isDefined && req.isDefined(name)) {
+                    req([name], function (value) {
+                        //The value may be a real defined module. Wrap
+                        //it in a function call, because this function is used
+                        //as the factory function for this ordered dependency.
+                        onLoad(function () {
+                            return value;
+                        });
+                    });
                 } else {
                     cacheWaiting.push({
                         name: name,
