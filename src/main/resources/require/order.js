@@ -115,7 +115,7 @@
                 //so that subsequent addition of a real type="text/javascript"
                 //tag will cause the scripts to be executed immediately in the
                 //correct order.
-                if (req.isDefined(name)) {
+                if (req.isDefined && req.isDefined(name)) {
                     req([name], function (value) {
                         //The value may be a real defined module. Wrap
                         //it in a function call, because this function is used

@@ -23,7 +23,7 @@ import org.mozilla.javascript.JavaScriptException;
 /**
  * 
  * @goal compile
- * @phase process-classes
+ * @phase compile
  * 
  */
 public class CompilerMojo extends AbstractMojo
