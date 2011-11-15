@@ -25,7 +25,7 @@ public class JSRunner
 
     private final ScriptableObject globalScope;
     
-    public JSRunner() throws IOException
+    public JSRunner()
     {
         Context context = Context.enter();
         context.setOptimizationLevel(-1); // Without this, Rhino hits a 64K bytecode limit and fails
@@ -74,7 +74,7 @@ public class JSRunner
         return evalString(scriptString, "Anonymous script", new HashMap<String,Object>());
     }
     
-    public String evalString( String scriptString, String sourceName, Map<String, Object> objectsToPutInScope ) throws IOException
+    public String evalString( String scriptString, String sourceName, Map<String, Object> objectsToPutInScope )
     {
         Context context = Context.enter();
         try {

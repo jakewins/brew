@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package org.jcoffeescript;
+package com.voltvoodoo.brew.compile;
 
 import java.util.Collection;
 
-public class Options {
+public class CoffeeScriptOptions {
     private final String javaScriptOptions;
 
-    public Options(Collection<Option> options) {
-        javaScriptOptions = String.format("{bare: %b}", options.contains(Option.BARE));
+    public CoffeeScriptOptions(Collection<CoffeeScriptOption> options) {
+        javaScriptOptions = String.format("{bare: %b}", options.contains(CoffeeScriptOption.BARE));
     }
 
     public String toJavaScript() {
