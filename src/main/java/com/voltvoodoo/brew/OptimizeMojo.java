@@ -191,6 +191,13 @@ public class OptimizeMojo extends AbstractMojo {
      * @parameter
      */
     private List<String> packages;
+    
+    /**
+     * Set to true to only minify the aggregated module files, rather
+     * than all files in the dependency tree.
+     * @parameter
+     */
+    private boolean minifyOnlyAggregatedFiles = false;
 
     /**
      * If using UglifyJS for script optimization, these config options can be
@@ -417,15 +424,21 @@ public class OptimizeMojo extends AbstractMojo {
     }
 
     private void moveModulesToOutputDir() throws IOException {
-        File from, to;
-        for(Module mod : getModules() ) {
-            from = new File(optimizeBuildDir, mod.getName() + ".js");
-            to = new File(optimizeOutputDir, mod.getName() + getOptimizedFileNameSuffix() + ".js");
-            FileUtils.copyFile( from, to );
+        if( ! optimizeBuildDir.equals(optimizeOutputDir) || getOptimizedFileNameSuffix().length() > 0) {
+            File from, to;
+            for(Module mod : getModules() ) {
+                from = new File(optimizeBuildDir, mod.getName() + ".js");
+                to = new File(optimizeOutputDir, mod.getName() + getOptimizedFileNameSuffix() + ".js");
+                FileUtils.copyFile( from, to );
+            }
         }
     }
 
     private String getOptimizedFileNameSuffix() {
         return optimizedFileNameSuffix.equalsIgnoreCase("false") ? "" : optimizedFileNameSuffix;
+    }
+
+    public boolean isMinifyOnlyAggregatedFiles() {
+        return minifyOnlyAggregatedFiles;
     }
 }

@@ -8309,9 +8309,17 @@ function (lang,   logger,   file,          parse,    optimize,   pragma,
             optimize.jsFile(fileName, fileName, config);
         } else if (!config.cssIn) {
             //Normal optimizations across modules.
-
+            
             //JS optimizations.
-            fileNames = file.getFilteredFileList(config.dir, /\.js$/, true);
+            if(config.minifyOnlyAggregatedFiles) {
+              fileNames = [];
+              modules.forEach(function (module) {
+                fileNames.push(config.dir + module.name + ".js");
+              });
+            } else {
+              fileNames = file.getFilteredFileList(config.dir, /\.js$/, true);
+            }
+            
             for (i = 0; (fileName = fileNames[i]); i++) {
                 //Generate the module name from the config.dir root.
                 moduleName = fileName.replace(config.dir, '');
@@ -8548,6 +8556,9 @@ function (lang,   logger,   file,          parse,    optimize,   pragma,
                 config.optimizeCss = "none";
             }
         }
+        
+        //Should we minify everything, or just aggregated files?
+        config.minifyOnlyAggregatedFiles = config.minifyOnlyAggregatedFiles || false;
 
         //Adjust the path properties as appropriate.
         //First make sure build paths use front slashes and end in a slash,

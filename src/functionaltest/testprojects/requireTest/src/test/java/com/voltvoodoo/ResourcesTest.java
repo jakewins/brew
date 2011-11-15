@@ -15,6 +15,7 @@ public class ResourcesTest  {
 
     private static final String OUTPUT_FILE = "main.js";
     private static String[] FILE_IDENTIFIERS = new String[] {"one.js","two.js","three.js"};
+    private static String MINIFICATION_IDENTIFIER = "thisWontBeHereIfThisFileIsMinified";
     
     private File output = new File("target/classes");
 
@@ -37,6 +38,16 @@ public class ResourcesTest  {
         File file = new File(output, OUTPUT_FILE);
         assertNotContains(file, "//");
         assertNotContains(file, "/*");
+    }
+    
+    @Test
+    public void onlyModuleFileShouldBeMinified() throws Exception {
+        File twoJs = new File(output, "two.js");
+        File aggregatedFile = new File(output, "main.js");
+        assertExists(aggregatedFile);
+        assertExists(twoJs);
+        assertNotContains(aggregatedFile, MINIFICATION_IDENTIFIER);
+        assertContains(twoJs, MINIFICATION_IDENTIFIER);
     }
 
     private static void assertExists(File file) throws Exception {
