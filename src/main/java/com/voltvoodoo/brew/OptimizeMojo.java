@@ -23,6 +23,7 @@ import org.mozilla.javascript.ErrorReporter;
  *
  */
 public class OptimizeMojo extends AbstractMojo {
+    
     /**
      * Javascript source directory.
      *
@@ -47,7 +48,8 @@ public class OptimizeMojo extends AbstractMojo {
     private File optimizeOutputDir;
 
     /**
-     * File name suffix for optimized modules.
+     * File name suffix for optimized modules. Set this to "false" to 
+     * not use a suffix.
      *
      * @parameter expression="-min"
      */
@@ -167,7 +169,6 @@ public class OptimizeMojo extends AbstractMojo {
      */
     private List<Module> modules;
 
-
     /**
      * Set paths for modules. If relative paths, set relative to baseUrl above.
      * If a special value of "empty:" is used for the path value, then that
@@ -185,6 +186,7 @@ public class OptimizeMojo extends AbstractMojo {
      * @parameter
      */
     private Map<String, List<String>> packagePaths;
+    
     /**
      * @parameter
      */
@@ -259,7 +261,6 @@ public class OptimizeMojo extends AbstractMojo {
      * @parameter default-value=false
      */
     private boolean optimizeAllPluginResources;
-
 
     /**
      * Wrap any build layer in a start and end text specified by wrap.
@@ -419,8 +420,12 @@ public class OptimizeMojo extends AbstractMojo {
         File from, to;
         for(Module mod : getModules() ) {
             from = new File(optimizeBuildDir, mod.getName() + ".js");
-            to = new File(optimizeOutputDir, mod.getName() + optimizedFileNameSuffix + ".js");
+            to = new File(optimizeOutputDir, mod.getName() + getOptimizedFileNameSuffix() + ".js");
             FileUtils.copyFile( from, to );
         }
+    }
+
+    private String getOptimizedFileNameSuffix() {
+        return optimizedFileNameSuffix.equalsIgnoreCase("false") ? "" : optimizedFileNameSuffix;
     }
 }
