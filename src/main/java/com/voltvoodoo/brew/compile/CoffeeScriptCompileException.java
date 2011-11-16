@@ -14,8 +14,16 @@
  * limitations under the License.
  */
 
-package org.jcoffeescript;
+package com.voltvoodoo.brew.compile;
 
-public enum Option {
-	BARE
+import org.mozilla.javascript.JavaScriptException;
+
+public class CoffeeScriptCompileException extends RuntimeException {
+
+    private static final long serialVersionUID = 3881864200487757451L;
+
+    CoffeeScriptCompileException (JavaScriptException e) {
+        super(e.getValue().toString(), e);
+    }
+
 }

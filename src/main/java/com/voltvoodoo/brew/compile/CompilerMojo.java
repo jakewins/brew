@@ -1,4 +1,4 @@
-package com.voltvoodoo.brew;
+package com.voltvoodoo.brew.compile;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -15,10 +15,11 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.codehaus.plexus.util.DirectoryScanner;
 import org.codehaus.plexus.util.IOUtil;
-import org.jcoffeescript.JCoffeeScriptCompileException;
-import org.jcoffeescript.JCoffeeScriptCompiler;
-import org.jcoffeescript.Option;
 import org.mozilla.javascript.JavaScriptException;
+
+import com.voltvoodoo.brew.DefaultErrorReporter;
+import com.voltvoodoo.brew.FileSetChangeMonitor;
+import com.voltvoodoo.brew.Optimizer;
 
 /**
  * 
@@ -107,7 +108,7 @@ public class CompilerMojo extends AbstractMojo
 
     private HamlCompiler hamlCompiler;
     private Optimizer moduleConverter;
-    private JCoffeeScriptCompiler coffeeCompiler;
+    private CoffeeScriptCompiler coffeeCompiler;
 
     public void execute() throws MojoExecutionException
     {
@@ -116,8 +117,8 @@ public class CompilerMojo extends AbstractMojo
 
             hamlCompiler = new HamlCompiler();
             moduleConverter = new Optimizer();
-            coffeeCompiler = new JCoffeeScriptCompiler(
-                    new LinkedList<Option>() );
+            coffeeCompiler = new CoffeeScriptCompiler(
+                    new LinkedList<CoffeeScriptOption>() );
 
             for ( String relativePath : getCoffeeScriptsRelativePaths() )
             {
@@ -125,7 +126,7 @@ public class CompilerMojo extends AbstractMojo
                 {
                     compileCoffeescriptFile( relativePath );
                 }
-                catch ( JCoffeeScriptCompileException e )
+                catch ( CoffeeScriptCompileException e )
                 {
                     getLog().error( "[" + relativePath + "]: " + e.getMessage() );
                     throw e;
@@ -160,7 +161,7 @@ public class CompilerMojo extends AbstractMojo
     }
 
     private void checkForChangesEvery( long ms ) throws FileNotFoundException,
-            JCoffeeScriptCompileException, IOException
+            CoffeeScriptCompileException, IOException
     {
         FileSetChangeMonitor hamlFiles = new FileSetChangeMonitor(
                 hamlSourceDir, HAML_PATTERN );
@@ -234,28 +235,14 @@ public class CompilerMojo extends AbstractMojo
     }
 
     private void compileCoffeescriptFile( String relativePath )
-            throws FileNotFoundException, JCoffeeScriptCompileException,
+            throws FileNotFoundException, CoffeeScriptCompileException,
             IOException
     {
         File coffee = new File( coffeeSourceDir, relativePath );
         File js = new File( coffeeOutputDir, relativePath.substring( 0,
                 relativePath.lastIndexOf( '.' ) ) + ".js" );
 
-        if ( js.exists() )
-        {
-            js.delete();
-        }
-        js.getParentFile().mkdirs();
-        js.createNewFile();
-
-        FileInputStream in = new FileInputStream( coffee );
-        FileOutputStream out = new FileOutputStream( js );
-
-        String compiled = coffeeCompiler.compile( IOUtil.toString( in ) );
-        IOUtil.copy( compiled, out );
-
-        in.close();
-        out.close();
+        coffeeCompiler.compile( coffee, js );
     }
 
     private void convertFromCommonModuleToAMD( String relativePath ) throws IOException {

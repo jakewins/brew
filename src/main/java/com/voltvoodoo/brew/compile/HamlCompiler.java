@@ -1,27 +1,32 @@
-package com.voltvoodoo.brew;
+package com.voltvoodoo.brew.compile;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class HamlCompiler extends JSRunner
+import com.voltvoodoo.brew.JSRunner;
+
+public class HamlCompiler extends AbstractTextFileCompiler
 {
     private static final String hamlClasspathFilename = "/haml/haml.js";
     private static final String jsonClasspathFilename = "/haml/json2.js";
     
-    public HamlCompiler() throws IOException
+    private JSRunner js = new JSRunner();
+    
+    public HamlCompiler()
     {
-        super();
-        evalScript(jsonClasspathFilename);
-        evalScript(hamlClasspathFilename);
+        super("js");
+        
+        
+        js.evalScript(jsonClasspathFilename);
+        js.evalScript(hamlClasspathFilename);
     }
     
-    public String compile( String haml ) throws IOException
+    public String compile( String haml )
     {
         Map<String, Object> vars = new HashMap<String, Object>();
         vars.put("hamlSource", haml);
         
-        return addModuleDefinition(evalString("Haml.optimize(Haml.compile(hamlSource));","HamlCompiler", vars));        
+        return addModuleDefinition(js.evalString("Haml.optimize(Haml.compile(hamlSource));","HamlCompiler", vars));        
     }
     
     private String addModuleDefinition(String script) {

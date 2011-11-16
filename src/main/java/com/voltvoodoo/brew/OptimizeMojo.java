@@ -437,7 +437,7 @@ public class OptimizeMojo extends AbstractMojo {
     private String getOptimizedFileNameSuffix() {
         return optimizedFileNameSuffix.equalsIgnoreCase("false") ? "" : optimizedFileNameSuffix;
     }
-
+    
     public boolean isMinifyOnlyAggregatedFiles() {
         return minifyOnlyAggregatedFiles;
     }
