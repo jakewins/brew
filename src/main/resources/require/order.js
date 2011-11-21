@@ -133,7 +133,7 @@
                 //Just a normal script tag append, but without async attribute
                 //on the script.
                 req([name], onLoad);
-            } else if (supportsLoadSeparateFromExecute) {
+            } else if (supportsLoadSeparateFromExecute && require.resourcesReady) {
                 //Just fetch the URL, but do not execute it yet. The
                 //non-standards IE case. Really not so nice because it is
                 //assuming and touching requrejs internals. OK though since
