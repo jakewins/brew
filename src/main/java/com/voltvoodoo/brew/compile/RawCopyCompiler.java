@@ -15,10 +15,16 @@ public class RawCopyCompiler implements Compiler {
         for(String path : files) {
             try
             {
-                in = new FileInputStream( new File(sourceDir, path) );
-                out = new FileOutputStream( new File(targetDir, path) );
-                IOUtil.copy( in, out );
-            } 
+                File source = new File(sourceDir, path);
+                File target = new File(targetDir, path);
+                File parentDir = target.getParentFile();
+                parentDir.mkdirs();
+                if (parentDir.exists()) {
+                    in = new FileInputStream(source);
+                    out = new FileOutputStream(target);
+                    IOUtil.copy( in, out );
+                }
+            }
             catch (Exception e) 
             {
                 throw new RuntimeException(e);

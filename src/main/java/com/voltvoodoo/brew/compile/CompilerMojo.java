@@ -7,7 +7,9 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.maven.plugin.AbstractMojo;
@@ -109,6 +111,7 @@ public class CompilerMojo extends AbstractMojo
     private HamlCompiler hamlCompiler;
     private Optimizer moduleConverter;
     private CoffeeScriptCompiler coffeeCompiler;
+    private RawCopyCompiler resourceCompiler;
 
     public void execute() throws MojoExecutionException
     {
@@ -119,6 +122,7 @@ public class CompilerMojo extends AbstractMojo
             moduleConverter = new Optimizer();
             coffeeCompiler = new CoffeeScriptCompiler(
                     new LinkedList<CoffeeScriptOption>() );
+            resourceCompiler = new RawCopyCompiler();
 
             for ( String relativePath : getCoffeeScriptsRelativePaths() )
             {
@@ -136,9 +140,37 @@ public class CompilerMojo extends AbstractMojo
             for ( String relativePath : getHamlRelativePaths() )
             {
                 try {
+                    compileHamlFile(relativePath);
+                } catch(JavaScriptException e) {
+                    getLog().error( "[" + relativePath + "]: " + e.getMessage() );
+                    throw e;
+                }
+            }
+
+            // TODO am guessing this is a copy/paste bug :)
+            /*
+            for ( String relativePath : getHamlRelativePaths() )
+            {
+                try {
                     compileHamlFile( relativePath );
                 } catch(JavaScriptException e) {
                     getLog().error( "[" + relativePath + "]: " + e.getMessage() );
+                    throw e;
+                }
+            }
+            */
+
+            String[] resourcePaths = getResourceRelativePaths();
+            if (resourcePaths != null && resourcePaths.length > 0)
+            {
+                try
+                {
+                    List<String> files = Arrays.asList(resourcePaths);
+                    resourceCompiler.compile(files, resourceSourceDir, resourceOutputDir);
+                }
+                catch (Exception e)
+                {
+                    getLog().error(e.getMessage(), e);
                     throw e;
                 }
             }
@@ -201,29 +233,9 @@ public class CompilerMojo extends AbstractMojo
 
                 for ( String file : resourceFiles.getModifiedFilesSinceLastTimeIAsked() )
                 {
-                    try
-                    {
-                        File source = new File(resourceSourceDir, file);
-                        File target = new File(resourceOutputDir, file);
-                        FileReader sourceReader = null;
-                        FileWriter targetWriter = null;
-                        try {
-                            sourceReader = new FileReader(source);
-                            targetWriter = new FileWriter(target);
-                            
-                            IOUtils.copy(sourceReader, targetWriter);
-                            System.out.println("[" + file + "]: Copied to output dir");
-                        } finally {
-                            if(sourceReader != null)
-                                sourceReader.close();
-                            if(targetWriter != null)
-                                targetWriter.close();
-                        }
-                    }
-                    catch ( Exception e )
-                    {
-                        getLog().error( "[" + file + "]: " + e.getMessage() );
-                    }
+                    File source = new File(resourceSourceDir, file);
+                    File target = new File(resourceOutputDir, file);
+                    copyFile(file, source, target);
                 }
 
             }
@@ -231,6 +243,30 @@ public class CompilerMojo extends AbstractMojo
         catch ( InterruptedException e )
         {
             getLog().info( "Caught interrupt, quitting." );
+        }
+    }
+
+    protected void copyFile(String file, File source, File target) {
+        try
+        {
+            FileReader sourceReader = null;
+            FileWriter targetWriter = null;
+            try {
+                sourceReader = new FileReader(source);
+                targetWriter = new FileWriter(target);
+
+                IOUtils.copy(sourceReader, targetWriter);
+                System.out.println("[" + file + "]: Copied to output dir");
+            } finally {
+                if(sourceReader != null)
+                    sourceReader.close();
+                if(targetWriter != null)
+                    targetWriter.close();
+            }
+        }
+        catch ( Exception e )
+        {
+            getLog().error("[" + file + "]: " + e.getMessage());
         }
     }
 
@@ -276,6 +312,7 @@ public class CompilerMojo extends AbstractMojo
         out.close();
     }
 
+
     private String[] getHamlRelativePaths() throws MojoFailureException
     {
         return getRelativePaths( hamlSourceDir, HAML_PATTERN );
@@ -287,9 +324,18 @@ public class CompilerMojo extends AbstractMojo
         return getRelativePaths( coffeeSourceDir, COFFEE_PATTERN );
     }
 
+    private String[] getResourceRelativePaths() throws MojoFailureException
+    {
+        return getRelativePaths( resourceSourceDir, ANY_PATTERN );
+    }
+
     private String[] getRelativePaths( File baseDir, String pattern )
             throws MojoFailureException
     {
+        if (baseDir == null || !baseDir.exists())
+        {
+            return new String[0];
+        }
         DirectoryScanner scanner = new DirectoryScanner();
         scanner.setBasedir( baseDir );
         scanner.setIncludes( new String[] { pattern } );
