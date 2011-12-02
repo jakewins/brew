@@ -233,40 +233,20 @@ public class CompilerMojo extends AbstractMojo
 
                 for ( String file : resourceFiles.getModifiedFilesSinceLastTimeIAsked() )
                 {
-                    File source = new File(resourceSourceDir, file);
-                    File target = new File(resourceOutputDir, file);
-                    copyFile(file, source, target);
+                    try
+                    {
+                        RawCopyCompiler.copyFile(file, resourceSourceDir, resourceOutputDir);
+                    }
+                    catch (IOException e)
+                    {
+                        getLog().error( "[" + file + "]: " + e.getMessage() );
+                    }
                 }
-
             }
         }
         catch ( InterruptedException e )
         {
             getLog().info( "Caught interrupt, quitting." );
-        }
-    }
-
-    protected void copyFile(String file, File source, File target) {
-        try
-        {
-            FileReader sourceReader = null;
-            FileWriter targetWriter = null;
-            try {
-                sourceReader = new FileReader(source);
-                targetWriter = new FileWriter(target);
-
-                IOUtils.copy(sourceReader, targetWriter);
-                System.out.println("[" + file + "]: Copied to output dir");
-            } finally {
-                if(sourceReader != null)
-                    sourceReader.close();
-                if(targetWriter != null)
-                    targetWriter.close();
-            }
-        }
-        catch ( Exception e )
-        {
-            getLog().error("[" + file + "]: " + e.getMessage());
         }
     }
 
