@@ -1,33 +1,48 @@
 package com.voltvoodoo.brew.compile;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.util.List;
-
 import org.codehaus.plexus.util.IOUtil;
 
-public class RawCopyCompiler implements Compiler {
+import java.io.*;
+import java.util.List;
 
-    public void compile(List<String> files, File sourceDir, File targetDir) {
-        FileOutputStream out = null;
-        FileInputStream in = null;
-        for(String path : files) {
+public class RawCopyCompiler implements Compiler
+{
+    public void compile(List<String> files, File sourceDir, File targetDir)
+    {
+        for (String path : files)
+        {
             try
             {
-                in = new FileInputStream( new File(sourceDir, path) );
-                out = new FileOutputStream( new File(targetDir, path) );
-                IOUtil.copy( in, out );
-            } 
-            catch (Exception e) 
+                copyFile(path, sourceDir, targetDir);
+            }
+            catch (Exception e)
             {
                 throw new RuntimeException(e);
             }
-            finally
+        }
+    }
+
+    public static void copyFile(String path, File sourceDir, File targetDir) throws IOException
+    {
+        FileOutputStream out = null;
+        FileInputStream in = null;
+        try
+        {
+            File source = new File(sourceDir, path);
+            File target = new File(targetDir, path);
+            File parentDir = target.getParentFile();
+            parentDir.mkdirs();
+            if (parentDir.exists())
             {
-                IOUtil.close( in );
-                IOUtil.close( out );
+                in = new FileInputStream(source);
+                out = new FileOutputStream(target);
+                IOUtil.copy(in, out);
             }
+        }
+        finally
+        {
+            IOUtil.close(in);
+            IOUtil.close(out);
         }
     }
 
