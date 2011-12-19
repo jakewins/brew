@@ -1,5 +1,5 @@
 define(['order!three'],function() {
-    
+
     var thisWontBeHereIfThisFileIsMinified = true;
 
     return {

@@ -67,7 +67,7 @@ import org.mozilla.javascript.WrappedException;
 public class RhinoRunner extends ScriptableObject {
 
     // TODO: Kill this in favor of the much simpler JSRunner class
-    
+
     private static final long serialVersionUID = 3859222870741981547L;
 
     @Override
@@ -94,7 +94,7 @@ public class RhinoRunner extends ScriptableObject {
             for(String include : includes) {
                 runner.processSource(cx, include);
             }
-            
+
             // Set up "arguments" in the global scope to contain the command
             // line arguments after the name of the script to execute
             Object[] array;
@@ -106,9 +106,9 @@ public class RhinoRunner extends ScriptableObject {
                 System.arraycopy(args, 0, array, 0, length);
             }
             Scriptable argsObj = cx.newArray(runner, array);
-            
+
             runner.defineProperty("arguments", argsObj, ScriptableObject.DONTENUM);
-            
+
             for(String key : globalVariables.keySet()) {
                 runner.defineProperty(key, globalVariables.get( key ), ScriptableObject.DONTENUM);
             }
@@ -118,7 +118,7 @@ public class RhinoRunner extends ScriptableObject {
             Context.exit();
         }
     }
-    
+
     /**
      * Print the string values of its arguments.
      *
@@ -161,7 +161,7 @@ public class RhinoRunner extends ScriptableObject {
             } else {
                 inputStream = getClass().getClassLoader().getResourceAsStream(path);
             }
-              
+
             return IOUtil.toString(inputStream);
         } catch (RuntimeException exc) {
             throw exc;
@@ -182,7 +182,7 @@ public class RhinoRunner extends ScriptableObject {
             runner.processSource(cx, Context.toString(element));
         }
     }
-    
+
     public InputStream getResourceAsStream(String path) {
         File file = new File(path);
         if(file.exists()) {
@@ -216,11 +216,11 @@ public class RhinoRunner extends ScriptableObject {
                     if(filename.startsWith( "." )) {
                         filename = filename.substring( 1 );
                     }
-                    
+
                     if(!filename.startsWith( "/" )) {
                         filename = "/" + filename;
                     }
-                    
+
                     in = new InputStreamReader(getClass().getResourceAsStream( filename ));
                 } catch( Exception e ) {
                     Context.reportError("Couldn't open file \"" + filename + "\".");

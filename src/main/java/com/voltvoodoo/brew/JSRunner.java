@@ -24,28 +24,28 @@ public class JSRunner
 {
 
     private final ScriptableObject globalScope;
-    
+
     public JSRunner()
     {
         Context context = Context.enter();
         context.setOptimizationLevel(-1); // Without this, Rhino hits a 64K bytecode limit and fails
         try {
             globalScope = context.initStandardObjects();
-            
+
             String[] names = { "print", "load", "readFile", "warn", "getResourceAsStream" };
             globalScope.defineFunctionProperties(names, JSRunner.class, ScriptableObject.DONTENUM);
-            
+
         } finally {
             Context.exit();
         }
     }
-    
+
     public void evalScript(String filename) {
         if(!filename.startsWith( "/" )) {
             filename = "/" + filename;
         }
-        InputStream inputStream = getClass().getResourceAsStream(filename);        
-        
+        InputStream inputStream = getClass().getResourceAsStream(filename);
+
         try {
             try {
                 Reader reader = new InputStreamReader(inputStream, "UTF-8");
@@ -73,33 +73,33 @@ public class JSRunner
     public String evalString( String scriptString) throws IOException {
         return evalString(scriptString, "Anonymous script", new HashMap<String,Object>());
     }
-    
+
     public String evalString( String scriptString, String sourceName, Map<String, Object> objectsToPutInScope )
     {
         Context context = Context.enter();
         try {
             Scriptable compileScope = context.newObject(globalScope);
             compileScope.setParentScope(globalScope);
-            
+
             for(String name : objectsToPutInScope.keySet()) {
                 compileScope.put( name, compileScope, objectsToPutInScope.get( name ));
             }
-            
+
             return (String)context.evaluateString(
-                    compileScope, 
+                    compileScope,
                     scriptString,
                     sourceName, 0, null);
-            
+
         } finally {
             Context.exit();
         }
     }
-    
-    // 
+
+    //
     // FUNCTIONS EXPOSED IN JS LAND
     //
-    
-    
+
+
     /**
      * Print the string values of its arguments.
      *
@@ -149,7 +149,7 @@ public class JSRunner
     public static void load(Context cx, Scriptable thisObj, Object[] args, Function funObj) {
         for (Object element : args) {
             String filename = Context.toString(element);
-            
+
             InputStreamReader in = null;
             try {
                 in = new InputStreamReader(getResourceAsStream( filename ));
@@ -181,7 +181,7 @@ public class JSRunner
             }
         }
     }
-    
+
     public static InputStream getResourceAsStream(String path) {
         File file = new File(path);
         if(file.exists()) {

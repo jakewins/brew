@@ -23,7 +23,7 @@ import org.mozilla.javascript.ErrorReporter;
  *
  */
 public class OptimizeMojo extends AbstractMojo {
-    
+
     /**
      * Javascript source directory.
      *
@@ -48,7 +48,7 @@ public class OptimizeMojo extends AbstractMojo {
     private File optimizeOutputDir;
 
     /**
-     * File name suffix for optimized modules. Set this to "false" to 
+     * File name suffix for optimized modules. Set this to "false" to
      * not use a suffix.
      *
      * @parameter expression="-min"
@@ -186,12 +186,12 @@ public class OptimizeMojo extends AbstractMojo {
      * @parameter
      */
     private Map<String, List<String>> packagePaths;
-    
+
     /**
      * @parameter
      */
     private List<String> packages;
-    
+
     /**
      * Set to true to only minify the aggregated module files, rather
      * than all files in the dependency tree.
@@ -437,7 +437,7 @@ public class OptimizeMojo extends AbstractMojo {
     private String getOptimizedFileNameSuffix() {
         return optimizedFileNameSuffix.equalsIgnoreCase("false") ? "" : optimizedFileNameSuffix;
     }
-    
+
     public boolean isMinifyOnlyAggregatedFiles() {
         return minifyOnlyAggregatedFiles;
     }

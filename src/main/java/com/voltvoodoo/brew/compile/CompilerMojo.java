@@ -22,10 +22,10 @@ import com.voltvoodoo.brew.FileSetChangeMonitor;
 import com.voltvoodoo.brew.Optimizer;
 
 /**
- * 
+ *
  * @goal compile
  * @phase compile
- * 
+ *
  */
 public class CompilerMojo extends AbstractMojo
 {
@@ -45,7 +45,7 @@ public class CompilerMojo extends AbstractMojo
      * @parameter expression="${project.build.outputDirectory}"
      */
     private File hamlOutputDir;
-    
+
     /**
      * @parameter expression="${project.build.outputDirectory}"
      */
@@ -58,36 +58,36 @@ public class CompilerMojo extends AbstractMojo
 
     /**
      * Javascript source directory.
-     * 
+     *
      * @parameter expression="${basedir}/src/main/coffeescript"
      */
     private File coffeeSourceDir;
 
     /**
      * Build modules are put here.
-     * 
+     *
      * @parameter expression="${project.build.outputDirectory}"
      */
     private File coffeeOutputDir;
-    
+
     /**
      * Used only by the watch option. Files in this directory
-     * are watched for changes and copied on the fly over to 
+     * are watched for changes and copied on the fly over to
      * {@link #resourceOutputDir}.
      * @parameter expression="${basedir}/src/main/resources"
      */
     private File resourceSourceDir;
-    
+
     /**
      * Output for watched resources.
-     * 
+     *
      * @parameter expression="${project.build.outputDirectory}"
      */
     private File resourceOutputDir;
 
     /**
      * Set to true to watch for changes to files and re-compile them on the fly.
-     * 
+     *
      * @parameter expression="${brew.watch}"
      */
     private boolean watch = false;
@@ -95,13 +95,13 @@ public class CompilerMojo extends AbstractMojo
     /**
      * Optional suffix to add before ".js" on files that
      * have been converted from commonjs modules to AMD modules.
-     * 
+     *
      * Default is ".amd", resulting in files like "myfile.amd.js".
-     * 
+     *
      * If you leave this empty, and keep module conversion input
      * and output directories the same, behaviour will be to
      * overwrite the commonjs module files with amd module files.
-     * 
+     *
      * @parameter expression=".amd"
      */
     private String amdModuleSuffix;
@@ -210,7 +210,7 @@ public class CompilerMojo extends AbstractMojo
                         try {
                             sourceReader = new FileReader(source);
                             targetWriter = new FileWriter(target);
-                            
+
                             IOUtils.copy(sourceReader, targetWriter);
                             System.out.println("[" + file + "]: Copied to output dir");
                         } finally {
