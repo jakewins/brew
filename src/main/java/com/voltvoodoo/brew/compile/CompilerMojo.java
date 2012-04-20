@@ -1,28 +1,21 @@
 package com.voltvoodoo.brew.compile;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.LinkedList;
-
+import com.voltvoodoo.brew.DefaultErrorReporter;
+import com.voltvoodoo.brew.FileSetChangeMonitor;
+import com.voltvoodoo.brew.Optimizer;
 import org.apache.commons.io.IOUtils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.codehaus.plexus.util.DirectoryScanner;
-import org.codehaus.plexus.util.IOUtil;
+import org.lesscss.LessCompiler;
+import org.lesscss.LessException;
 import org.mozilla.javascript.JavaScriptException;
 
-import com.voltvoodoo.brew.DefaultErrorReporter;
-import com.voltvoodoo.brew.FileSetChangeMonitor;
-import com.voltvoodoo.brew.Optimizer;
+import java.io.*;
+import java.util.LinkedList;
 
 /**
- * 
  * @goal compile
  * @phase compile
  * 
@@ -33,6 +26,8 @@ public class CompilerMojo extends AbstractMojo
     private static final String COFFEE_PATTERN = "**/*.coffee";
 
     private static final String HAML_PATTERN = "**/*.haml";
+
+    private static final String LESS_PATTERN = "**/*.less";
 
     private static final String ANY_PATTERN = "**/*";
 
@@ -71,6 +66,20 @@ public class CompilerMojo extends AbstractMojo
     private File coffeeOutputDir;
     
     /**
+     * Javascript source directory.
+     *
+     * @parameter expression="${basedir}/src/main/coffeescript"
+     */
+    private File lessSourceDir;
+
+    /**
+     * Build modules are put here.
+     *
+     * @parameter expression="${project.build.outputDirectory}"
+     */
+    private File lessOutputDir;
+
+    /**
      * Used only by the watch option. Files in this directory
      * are watched for changes and copied on the fly over to 
      * {@link #resourceOutputDir}.
@@ -107,102 +116,101 @@ public class CompilerMojo extends AbstractMojo
     private String amdModuleSuffix;
 
     private HamlCompiler hamlCompiler;
+    private LessCompiler lessCompiler;
     private Optimizer moduleConverter;
     private CoffeeScriptCompiler coffeeCompiler;
 
-    public void execute() throws MojoExecutionException
-    {
-        try
-        {
-
+    public void execute() throws MojoExecutionException {
+        try {
+            lessCompiler = new LessCompiler();
             hamlCompiler = new HamlCompiler();
             moduleConverter = new Optimizer();
             coffeeCompiler = new CoffeeScriptCompiler(
-                    new LinkedList<CoffeeScriptOption>() );
+                    new LinkedList<CoffeeScriptOption>());
 
-            for ( String relativePath : getCoffeeScriptsRelativePaths() )
-            {
-                try
-                {
-                    compileCoffeescriptFile( relativePath );
-                }
-                catch ( CoffeeScriptCompileException e )
-                {
-                    getLog().error( "[" + relativePath + "]: " + e.getMessage() );
-                    throw e;
-                }
-            }
-
-            for ( String relativePath : getHamlRelativePaths() )
-            {
+            for (String relativePath : getLessRelativePaths()) {
                 try {
-                    compileHamlFile( relativePath );
-                } catch(JavaScriptException e) {
-                    getLog().error( "[" + relativePath + "]: " + e.getMessage() );
+                    compileLessFile(relativePath);
+                } catch (CoffeeScriptCompileException e) {
+                    getLog().error("[" + relativePath + "]: " + e.getMessage());
                     throw e;
                 }
             }
 
-            if ( watch )
-            {
-                System.out.println( "Watching for changes to coffeescript and haml files.." );
-                checkForChangesEvery( 500 );
+            for (String relativePath : getCoffeeScriptsRelativePaths()) {
+                try {
+                    compileCoffeescriptFile(relativePath);
+                } catch (CoffeeScriptCompileException e) {
+                    getLog().error("[" + relativePath + "]: " + e.getMessage());
+                    throw e;
+                }
             }
 
-        }
-        catch ( RuntimeException exc )
-        {
+            for (String relativePath : getHamlRelativePaths()) {
+                try {
+                    compileHamlFile(relativePath);
+                } catch (JavaScriptException e) {
+                    getLog().error("[" + relativePath + "]: " + e.getMessage());
+                    throw e;
+                }
+            }
+
+            if (watch) {
+                System.out.println("Watching for changes to coffeescript and haml files..");
+                checkForChangesEvery(500);
+            }
+
+        } catch (RuntimeException exc) {
             throw exc;
-        }
-        catch ( Exception exc )
-        {
-            throw new MojoExecutionException( exc.getMessage(), exc );
+        } catch (Exception exc) {
+            throw new MojoExecutionException(exc.getMessage(), exc);
         }
     }
 
-    private void checkForChangesEvery( long ms ) throws FileNotFoundException,
-            CoffeeScriptCompileException, IOException
-    {
+    private void checkForChangesEvery(long ms) throws FileNotFoundException,
+            CoffeeScriptCompileException, IOException {
+        FileSetChangeMonitor lessFiles = new FileSetChangeMonitor(
+                lessSourceDir, LESS_PATTERN);
         FileSetChangeMonitor hamlFiles = new FileSetChangeMonitor(
-                hamlSourceDir, HAML_PATTERN );
+                hamlSourceDir, HAML_PATTERN);
         FileSetChangeMonitor coffeeFiles = new FileSetChangeMonitor(
-                coffeeSourceDir, COFFEE_PATTERN );
+                coffeeSourceDir, COFFEE_PATTERN);
         FileSetChangeMonitor resourceFiles = new FileSetChangeMonitor(
-                resourceSourceDir, ANY_PATTERN );
+                resourceSourceDir, ANY_PATTERN);
 
-        try
-        {
-            while ( true )
-            {
-                Thread.sleep( ms );
+        try {
+            while (true) {
+                Thread.sleep(ms);
 
-                for ( String file : hamlFiles.getModifiedFilesSinceLastTimeIAsked() )
-                {
+                for (String file : lessFiles.getModifiedFilesSinceLastTimeIAsked()) {
                     try {
-                        compileHamlFile( file);
+                        compileLessFile(file);
                         System.out.println("[" + file + "]: Compiled");
-                    } catch(Exception e) {
-                        getLog().error( "[" + file + "]: " + e.getMessage() );
+                    } catch (Exception e) {
+                        getLog().error("[" + file + "]: " + e.getMessage());
                     }
                 }
 
-                for ( String file : coffeeFiles.getModifiedFilesSinceLastTimeIAsked() )
-                {
-                    try
-                    {
-                        compileCoffeescriptFile( file );
+                for (String file : hamlFiles.getModifiedFilesSinceLastTimeIAsked()) {
+                    try {
+                        compileHamlFile(file);
                         System.out.println("[" + file + "]: Compiled");
-                    }
-                    catch ( Exception e )
-                    {
-                        getLog().error( "[" + file + "]: " + e.getMessage() );
+                    } catch (Exception e) {
+                        getLog().error("[" + file + "]: " + e.getMessage());
                     }
                 }
 
-                for ( String file : resourceFiles.getModifiedFilesSinceLastTimeIAsked() )
-                {
-                    try
-                    {
+                for (String file : coffeeFiles.getModifiedFilesSinceLastTimeIAsked()) {
+                    try {
+                        compileCoffeescriptFile(file);
+                        System.out.println("[" + file + "]: Compiled");
+                    } catch (Exception e) {
+                        getLog().error("[" + file + "]: " + e.getMessage());
+                    }
+                }
+
+                for (String file : resourceFiles.getModifiedFilesSinceLastTimeIAsked()) {
+                    try {
                         File source = new File(resourceSourceDir, file);
                         File target = new File(resourceOutputDir, file);
                         FileReader sourceReader = null;
@@ -210,39 +218,50 @@ public class CompilerMojo extends AbstractMojo
                         try {
                             sourceReader = new FileReader(source);
                             targetWriter = new FileWriter(target);
-                            
+
                             IOUtils.copy(sourceReader, targetWriter);
                             System.out.println("[" + file + "]: Copied to output dir");
                         } finally {
-                            if(sourceReader != null)
+                            if (sourceReader != null)
                                 sourceReader.close();
-                            if(targetWriter != null)
+                            if (targetWriter != null)
                                 targetWriter.close();
                         }
-                    }
-                    catch ( Exception e )
-                    {
-                        getLog().error( "[" + file + "]: " + e.getMessage() );
+                    } catch (Exception e) {
+                        getLog().error("[" + file + "]: " + e.getMessage());
                     }
                 }
 
             }
-        }
-        catch ( InterruptedException e )
-        {
-            getLog().info( "Caught interrupt, quitting." );
+        } catch (InterruptedException e) {
+            getLog().info("Caught interrupt, quitting.");
         }
     }
 
     private void compileCoffeescriptFile( String relativePath )
-            throws FileNotFoundException, CoffeeScriptCompileException,
-            IOException
+            throws CoffeeScriptCompileException, IOException
     {
         File coffee = new File( coffeeSourceDir, relativePath );
         File js = new File( coffeeOutputDir, relativePath.substring( 0,
                 relativePath.lastIndexOf( '.' ) ) + ".js" );
 
-        coffeeCompiler.compile( coffee, js );
+        if(coffee.lastModified() != js.lastModified()){
+            coffeeCompiler.compile( coffee, js );
+        }
+        js.setLastModified(coffee.lastModified());
+
+    }
+
+    private void compileLessFile( String relativePath )
+            throws IOException, LessException {
+        File less = new File( lessSourceDir, relativePath );
+        File css = new File( lessOutputDir, relativePath.substring( 0,
+                relativePath.lastIndexOf( '.' ) ) + ".css" );
+
+        if(less.lastModified() != css.lastModified()){
+            lessCompiler.compile(less, css);
+        }
+        css.setLastModified(less.lastModified());
     }
 
     private void convertFromCommonModuleToAMD( String relativePath ) throws IOException {
@@ -255,25 +274,14 @@ public class CompilerMojo extends AbstractMojo
 
     private void compileHamlFile( String relativePath ) throws IOException
     {
-        File coffee = new File( hamlSourceDir, relativePath ).getAbsoluteFile();
-        File js = new File( hamlOutputDir, relativePath.substring( 0,
+        File haml = new File( hamlSourceDir, relativePath ).getAbsoluteFile();
+        File html = new File( hamlOutputDir, relativePath.substring( 0,
                 relativePath.lastIndexOf( '.' ) ) + ".js" ).getAbsoluteFile();
 
-        if ( js.exists() )
-        {
-            js.delete();
+        if(haml.lastModified() != html.lastModified()){
+            hamlCompiler.compile(haml, html);
         }
-        js.getParentFile().mkdirs();
-        js.createNewFile();
-
-        FileInputStream in = new FileInputStream( coffee );
-        FileOutputStream out = new FileOutputStream( js );
-
-        String compiled = hamlCompiler.compile( IOUtil.toString( in ) );
-        IOUtil.copy( compiled, out );
-
-        in.close();
-        out.close();
+        html.setLastModified(haml.lastModified());
     }
 
     private String[] getHamlRelativePaths() throws MojoFailureException
@@ -285,6 +293,12 @@ public class CompilerMojo extends AbstractMojo
             throws MojoFailureException
     {
         return getRelativePaths( coffeeSourceDir, COFFEE_PATTERN );
+    }
+
+    private String[] getLessRelativePaths()
+            throws MojoFailureException
+    {
+        return getRelativePaths( lessSourceDir, LESS_PATTERN );
     }
 
     private String[] getRelativePaths( File baseDir, String pattern )
