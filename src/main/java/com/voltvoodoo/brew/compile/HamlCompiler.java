@@ -1,9 +1,13 @@
 package com.voltvoodoo.brew.compile;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 import com.voltvoodoo.brew.JSRunner;
+import org.codehaus.plexus.util.IOUtil;
 
 public class HamlCompiler extends AbstractTextFileCompiler
 {
@@ -28,6 +32,26 @@ public class HamlCompiler extends AbstractTextFileCompiler
         
         return addModuleDefinition(js.evalString("Haml.optimize(Haml.compile(hamlSource));","HamlCompiler", vars));        
     }
+
+    public void compile(java.io.File input, java.io.File output) throws IOException {
+        if ( output.exists() )
+        {
+            output.delete();
+        }
+        output.getParentFile().mkdirs();
+        output.createNewFile();
+
+        FileInputStream in = new FileInputStream( input );
+        FileOutputStream out = new FileOutputStream( output );
+
+        String compiled = compile(IOUtil.toString(in));
+        IOUtil.copy( compiled, out );
+
+        in.close();
+        out.close();
+    }
+
+
     
     private String addModuleDefinition(String script) {
         return  "(function(define){\n"+

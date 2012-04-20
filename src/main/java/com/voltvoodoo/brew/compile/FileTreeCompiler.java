@@ -1,13 +1,12 @@
 package com.voltvoodoo.brew.compile;
 
+import org.codehaus.plexus.util.DirectoryScanner;
+
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-
-import org.codehaus.plexus.util.DirectoryScanner;
-
-import com.google.common.collect.Lists;
 
 public class FileTreeCompiler {
 
@@ -33,6 +32,6 @@ public class FileTreeCompiler {
         scanner.setIncludes(new String[]{ pattern });
         
         scanner.scan();
-        compiler.compile(Lists.newArrayList(scanner.getIncludedFiles()), sourceDir, outputDir);
+        compiler.compile(Arrays.asList(scanner.getIncludedFiles()), sourceDir, outputDir);
     }
 }
