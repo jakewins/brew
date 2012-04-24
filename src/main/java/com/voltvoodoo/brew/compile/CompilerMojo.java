@@ -242,7 +242,10 @@ public class CompilerMojo extends AbstractMojo
         File js = new File( coffeeOutputDir, relativePath.substring( 0,
                 relativePath.lastIndexOf( '.' ) ) + ".js" );
 
-        coffeeCompiler.compile( coffee, js );
+        boolean jsFileIsOlderThanCoffeeFile = js.lastModified() < coffee.lastModified();
+        if(jsFileIsOlderThanCoffeeFile) {
+            coffeeCompiler.compile( coffee, js );
+        }
     }
 
     private void convertFromCommonModuleToAMD( String relativePath ) throws IOException {
