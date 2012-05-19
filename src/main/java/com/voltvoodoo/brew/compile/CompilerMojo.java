@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.LinkedList;
 
 import org.apache.commons.io.IOUtils;
@@ -93,6 +94,13 @@ public class CompilerMojo extends AbstractMojo
     private boolean watch = false;
 
     /**
+     * Set to true to invoke the Coffeescript compiler with the "bare" option.
+     * 
+     * @parameter expression="${brew.bare}"
+     */
+    private boolean bare = false;
+
+    /**
      * Optional suffix to add before ".js" on files that
      * have been converted from commonjs modules to AMD modules.
      * 
@@ -115,10 +123,14 @@ public class CompilerMojo extends AbstractMojo
         try
         {
 
+            Collection coffeeScriptOptions = new LinkedList<CoffeeScriptOption>();
+            if ( bare )
+            {
+                coffeeScriptOptions.add( CoffeeScriptOption.BARE );
+            }
             hamlCompiler = new HamlCompiler();
             moduleConverter = new Optimizer();
-            coffeeCompiler = new CoffeeScriptCompiler(
-                    new LinkedList<CoffeeScriptOption>() );
+            coffeeCompiler = new CoffeeScriptCompiler(coffeeScriptOptions);
 
             for ( String relativePath : getCoffeeScriptsRelativePaths() )
             {
