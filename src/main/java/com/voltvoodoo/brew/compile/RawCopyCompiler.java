@@ -18,8 +18,8 @@ public class RawCopyCompiler implements Compiler {
                 in = new FileInputStream( new File(sourceDir, path) );
                 out = new FileOutputStream( new File(targetDir, path) );
                 IOUtil.copy( in, out );
-            } 
-            catch (Exception e) 
+            }
+            catch (Exception e)
             {
                 throw new RuntimeException(e);
             }

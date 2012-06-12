@@ -47,13 +47,13 @@ public class Optimizer
 
     public void build( File buildDir, boolean providePlugins, File buildProfile, ErrorReporter reporter ) throws IOException
     {
-        
+
         // Move require deps into project dir temporarily.
         // These can not be loaded from classpath, because
         // require.js assumes these will be intermingled with the
         // raw source files we are compiling.
         putRequirePluginsIn(buildDir);
-        
+
         String[] includes = new String[0];
 
         String[] args = new String[2];
@@ -61,7 +61,7 @@ public class Optimizer
         args[1] = buildProfile.getAbsolutePath();
 
         Map<String, Object> globalVariables = new HashMap<String, Object>();
-        
+
         RhinoRunner.exec(includes, buildScript.getAbsolutePath(), args, globalVariables, reporter);
     }
 

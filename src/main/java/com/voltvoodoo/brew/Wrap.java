@@ -4,7 +4,7 @@ package com.voltvoodoo.brew;
  * Settings for the wrap properties.
  */
 public class Wrap {
-    
+
     /**
      * Wrap any build layer in a start and end text specified by wrap.
      * Use this to encapsulate the module code so that define/require are
@@ -16,12 +16,12 @@ public class Wrap {
      * @parameter
      */
     private String start;
-    
+
     /**
      * @parameter
      */
     private String end;
-    
+
     /**
      * Another way to use wrap, but uses file paths. This makes it easier
      * to have the start text contain license information and the end text
@@ -32,7 +32,7 @@ public class Wrap {
      * @parameter
      */
     private String startFile;
-    
+
     /**
      * @parameter
      */

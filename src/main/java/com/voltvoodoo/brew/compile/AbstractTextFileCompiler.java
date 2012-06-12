@@ -15,9 +15,9 @@ public abstract class AbstractTextFileCompiler implements Compiler {
     public AbstractTextFileCompiler(String outputFileSuffix) {
         this.outputFileSuffix = outputFileSuffix;
     }
-    
+
     public abstract String compile(String string);
-    
+
     public void compile(File source, File target)
             throws CoffeeScriptCompileException, IOException {
 

@@ -32,7 +32,7 @@
               <goal>compile</goal>
             </goals>
           </execution>
-        </executions> 
+        </executions>
         <configuration>
           <sourceDir>src/main/coffee</sourceDir>
           <outputDir>target/classes</outputDir>

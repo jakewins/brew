@@ -8309,7 +8309,7 @@ function (lang,   logger,   file,          parse,    optimize,   pragma,
             optimize.jsFile(fileName, fileName, config);
         } else if (!config.cssIn) {
             //Normal optimizations across modules.
-            
+
             //JS optimizations.
             if(config.minifyOnlyAggregatedFiles) {
               fileNames = [];
@@ -8319,7 +8319,7 @@ function (lang,   logger,   file,          parse,    optimize,   pragma,
             } else {
               fileNames = file.getFilteredFileList(config.dir, /\.js$/, true);
             }
-            
+
             for (i = 0; (fileName = fileNames[i]); i++) {
                 //Generate the module name from the config.dir root.
                 moduleName = fileName.replace(config.dir, '');
@@ -8556,7 +8556,7 @@ function (lang,   logger,   file,          parse,    optimize,   pragma,
                 config.optimizeCss = "none";
             }
         }
-        
+
         //Should we minify everything, or just aggregated files?
         config.minifyOnlyAggregatedFiles = config.minifyOnlyAggregatedFiles || false;
 

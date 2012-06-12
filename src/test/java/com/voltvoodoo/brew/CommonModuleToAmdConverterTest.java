@@ -15,7 +15,7 @@ public class CommonModuleToAmdConverterTest
 {
 
     private static final Logger LOG = Logger.getLogger(CommonModuleToAmdConverterTest.class.getSimpleName());
-    
+
     private static final String expectedAmdOutput = "define([\"require\", \"exports\", \"module\", \"x\"], function(require, exports, module) {\nvar x = require(\"x\");alert(x);\n});";
 
     /**
@@ -27,7 +27,7 @@ public class CommonModuleToAmdConverterTest
     @Ignore
     public void shouldConvertModuleFormat() throws IOException {
         Optimizer converter = new Optimizer();
-        
+
         //File moduleFile = getCommonModuleFile();
         File moduleFile = new File("/tmp/asdf.asdf");
         File amdFile = File.createTempFile("amdModule", "js");
@@ -49,5 +49,5 @@ public class CommonModuleToAmdConverterTest
             throw new RuntimeException("wrap: " + exc.getMessage(), exc);
         }
     }
-    
+
 }

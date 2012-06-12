@@ -92,7 +92,7 @@ public class CoffeeScriptCompiler implements Compiler {
     }
 
     public void compile (File source, File target) throws CoffeeScriptCompileException, IOException {
-        
+
         if ( target.exists() )
         {
             target.delete();

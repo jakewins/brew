@@ -9,26 +9,26 @@ public class HamlCompiler extends AbstractTextFileCompiler
 {
     private static final String hamlClasspathFilename = "/haml/haml.js";
     private static final String jsonClasspathFilename = "/haml/json2.js";
-    
+
     private JSRunner js = new JSRunner();
-    
+
     public HamlCompiler()
     {
         super("js");
-        
-        
+
+
         js.evalScript(jsonClasspathFilename);
         js.evalScript(hamlClasspathFilename);
     }
-    
+
     public String compile( String haml )
     {
         Map<String, Object> vars = new HashMap<String, Object>();
         vars.put("hamlSource", haml);
-        
-        return addModuleDefinition(js.evalString("Haml.optimize(Haml.compile(hamlSource));","HamlCompiler", vars));        
+
+        return addModuleDefinition(js.evalString("Haml.optimize(Haml.compile(hamlSource));","HamlCompiler", vars));
     }
-    
+
     private String addModuleDefinition(String script) {
         return  "(function(define){\n"+
                   "define(function(){return function(vars){\n" +
