@@ -118,8 +118,19 @@ public class CompilerMojo extends AbstractMojo
     private Optimizer moduleConverter;
     private CoffeeScriptCompiler coffeeCompiler;
 
-    public void execute() throws MojoExecutionException
-    {
+    /**
+     * Skip execution of this mojo.
+     * @parameter expression="${brew.skip}" default="false"
+     */
+    private boolean skip = false;
+
+    public void execute() throws MojoExecutionException, MojoFailureException {
+    	
+    	if(skip) 
+    	{
+    		return;
+    	}
+    	
         try
         {
 

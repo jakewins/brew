@@ -282,9 +282,20 @@ public class OptimizeMojo extends AbstractMojo {
      */
     private boolean providePlugins = false;
 
+    /**
+     * Skip execution of this mojo.
+     * @parameter expression="${brew.skip}" default="false"
+     */
+    private boolean skip = false;
+
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
 
+        	if(skip) 
+        	{
+        		return;
+        	}
+        	
             Optimizer builder = new Optimizer();
             ErrorReporter reporter = new DefaultErrorReporter(getLog(), true);
             builder.build( optimizeBuildDir, providePlugins, createBuildProfile(), reporter );
@@ -405,12 +416,14 @@ public class OptimizeMojo extends AbstractMojo {
         return wrap;
     }
 
-    @JsonIgnore
+    @Override
+	@JsonIgnore
     public Log getLog() {
         return super.getLog();
     }
 
-    @SuppressWarnings( "rawtypes" )
+    @Override
+	@SuppressWarnings( "rawtypes" )
     @JsonIgnore
     public Map getPluginContext() {
         return super.getPluginContext();
