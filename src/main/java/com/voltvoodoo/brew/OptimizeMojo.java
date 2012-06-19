@@ -289,12 +289,13 @@ public class OptimizeMojo extends AbstractMojo {
     private boolean skip = false;
 
     public void execute() throws MojoExecutionException, MojoFailureException {
-        try {
 
-        	if(skip) 
-        	{
-        		return;
-        	}
+    	if(skip) 
+    	{
+    		return;
+    	}
+    	
+        try {
         	
             Optimizer builder = new Optimizer();
             ErrorReporter reporter = new DefaultErrorReporter(getLog(), true);

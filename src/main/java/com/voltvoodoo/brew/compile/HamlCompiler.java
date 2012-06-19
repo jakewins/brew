@@ -12,16 +12,16 @@ public class HamlCompiler extends AbstractTextFileCompiler
     
     private JSRunner js = new JSRunner();
     
-    public HamlCompiler()
+    public HamlCompiler(boolean onlyCompileFilesThatHaveChanged)
     {
-        super("js");
-        
+        super("js", onlyCompileFilesThatHaveChanged);
         
         js.evalScript(jsonClasspathFilename);
         js.evalScript(hamlClasspathFilename);
     }
     
-    public String compile( String haml )
+    @Override
+	public String compile( String haml )
     {
         Map<String, Object> vars = new HashMap<String, Object>();
         vars.put("hamlSource", haml);

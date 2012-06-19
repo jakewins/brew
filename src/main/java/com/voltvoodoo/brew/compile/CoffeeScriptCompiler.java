@@ -16,9 +16,6 @@
 
 package com.voltvoodoo.brew.compile;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -26,26 +23,51 @@ import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
-import org.codehaus.plexus.util.IOUtil;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.JavaScriptException;
 import org.mozilla.javascript.Scriptable;
 
 
 
-public class CoffeeScriptCompiler implements Compiler {
+public class CoffeeScriptCompiler extends AbstractTextFileCompiler {
 
-    private final Scriptable globalScope;
+    private Scriptable globalScope;
     private final CoffeeScriptOptions options;
 
-	public CoffeeScriptCompiler() {
-        this(Collections.<CoffeeScriptOption>emptyList());
+	public CoffeeScriptCompiler(boolean onlyCompileFilesThatHaveChanged) {
+        this(Collections.<CoffeeScriptOption>emptyList(), onlyCompileFilesThatHaveChanged);
     }
 
-	public CoffeeScriptCompiler(Collection<CoffeeScriptOption> options) {
-        ClassLoader classLoader = getClass().getClassLoader();
+	public CoffeeScriptCompiler(Collection<CoffeeScriptOption> options,
+			boolean onlyCompileFilesThatHaveChanged)
+    {
+        super("js", onlyCompileFilesThatHaveChanged);
+        this.options = new CoffeeScriptOptions(options);
+        
+        initCoffescriptCompiler();
+    }
+
+	@Override
+	public String compile (String coffeeScriptSource) {
+        Context context = Context.enter();
+        try {
+            Scriptable compileScope = context.newObject(globalScope);
+            compileScope.setParentScope(globalScope);
+            compileScope.put("coffeeScriptSource", compileScope, coffeeScriptSource);
+            try {
+                return (String)context.evaluateString(compileScope, String.format("CoffeeScript.compile(coffeeScriptSource, %s);", options.toJavaScript()),
+                        "JCoffeeScriptCompiler", 0, null);
+            } catch (JavaScriptException e) {
+                throw new CoffeeScriptCompileException(e);
+            }
+        } finally {
+            Context.exit();
+        }
+    }
+
+	private void initCoffescriptCompiler() throws Error {
+		ClassLoader classLoader = getClass().getClassLoader();
         InputStream inputStream = classLoader.getResourceAsStream("org/jcoffeescript/coffee-script.js");
         try {
             try {
@@ -70,56 +92,5 @@ public class CoffeeScriptCompiler implements Compiler {
         } catch (IOException e) {
             throw new Error(e); // This should never happen
         }
-
-        this.options = new CoffeeScriptOptions(options);
-    }
-
-	public String compile (String coffeeScriptSource) {
-        Context context = Context.enter();
-        try {
-            Scriptable compileScope = context.newObject(globalScope);
-            compileScope.setParentScope(globalScope);
-            compileScope.put("coffeeScriptSource", compileScope, coffeeScriptSource);
-            try {
-                return (String)context.evaluateString(compileScope, String.format("CoffeeScript.compile(coffeeScriptSource, %s);", options.toJavaScript()),
-                        "JCoffeeScriptCompiler", 0, null);
-            } catch (JavaScriptException e) {
-                throw new CoffeeScriptCompileException(e);
-            }
-        } finally {
-            Context.exit();
-        }
-    }
-
-    public void compile (File source, File target) throws CoffeeScriptCompileException, IOException {
-        
-        if ( target.exists() )
-        {
-            target.delete();
-        }
-        target.getParentFile().mkdirs();
-        target.createNewFile();
-
-        FileInputStream in = new FileInputStream( source );
-        FileOutputStream out = new FileOutputStream( target );
-
-        String compiled = compile( IOUtil.toString( in ) );
-        IOUtil.copy( compiled, out );
-
-        in.close();
-        out.close();
-    }
-
-    public void compile(List<String> files, File sourceDir, File targetDir) {
-        try {
-            for(String path : files) {
-                String newPath = path.substring(0, path.lastIndexOf('.')) + ".js";
-                compile(new File(sourceDir, path), new File(targetDir, newPath));
-            }
-        } catch(IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-
+	}
 }

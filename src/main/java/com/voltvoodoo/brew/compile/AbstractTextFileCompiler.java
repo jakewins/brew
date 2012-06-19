@@ -4,24 +4,30 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.List;
 
 import org.codehaus.plexus.util.IOUtil;
 
-public abstract class AbstractTextFileCompiler implements Compiler {
+public abstract class AbstractTextFileCompiler extends AbstractCompiler {
 
     private String outputFileSuffix;
 
-    public AbstractTextFileCompiler(String outputFileSuffix) {
+    public AbstractTextFileCompiler(String outputFileSuffix, boolean onlyCompileFilesThatHaveChanged) {
+    	super(onlyCompileFilesThatHaveChanged);
         this.outputFileSuffix = outputFileSuffix;
     }
     
     public abstract String compile(String string);
     
-    public void compile(File source, File target)
-            throws CoffeeScriptCompileException, IOException {
-
-        if (target.exists()) {
+    @Override
+	public void compile(File source, File target)
+            throws CoffeeScriptCompileException, IOException 
+    {
+    	String targetPath = target.getAbsolutePath();
+        target = new File(targetPath.substring(0, targetPath.lastIndexOf('.'))
+                + "." + outputFileSuffix);
+    	
+        if (target.exists()) 
+        {
             target.delete();
         }
         target.getParentFile().mkdirs();
@@ -35,17 +41,5 @@ public abstract class AbstractTextFileCompiler implements Compiler {
 
         in.close();
         out.close();
-    }
-
-    public void compile(List<String> files, File sourceDir, File targetDir) {
-        try {
-            for (String path : files) {
-                String newPath = path.substring(0, path.lastIndexOf('.'))
-                        + outputFileSuffix;
-                compile(new File(sourceDir, path), new File(targetDir, newPath));
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 }

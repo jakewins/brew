@@ -124,6 +124,13 @@ public class CompilerMojo extends AbstractMojo
      */
     private boolean skip = false;
 
+    /**
+     * Force compilation of all files, even if the source file
+     * has not changed since the last compilation.
+     * @parameter expression="${brew.force}" default="false"
+     */
+    private boolean force = false;
+
     public void execute() throws MojoExecutionException, MojoFailureException {
     	
     	if(skip) 
@@ -134,14 +141,15 @@ public class CompilerMojo extends AbstractMojo
         try
         {
 
-            Collection coffeeScriptOptions = new LinkedList<CoffeeScriptOption>();
+            Collection<CoffeeScriptOption> coffeeScriptOptions = new LinkedList<CoffeeScriptOption>();
             if ( bare )
             {
                 coffeeScriptOptions.add( CoffeeScriptOption.BARE );
             }
-            hamlCompiler = new HamlCompiler();
+            
+            hamlCompiler = new HamlCompiler(force);
             moduleConverter = new Optimizer();
-            coffeeCompiler = new CoffeeScriptCompiler(coffeeScriptOptions);
+            coffeeCompiler = new CoffeeScriptCompiler(coffeeScriptOptions,force);
 
             for ( String relativePath : getCoffeeScriptsRelativePaths() )
             {
