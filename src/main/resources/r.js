@@ -8548,6 +8548,10 @@ function (lang,   logger,   file,          parse,    optimize,   pragma,
                 }
             ];
 
+            if (config.includeRequire) {
+                config.modules[0].includeRequire = true;
+            }
+
             //Does not have a build file, so set up some defaults.
             //Optimizing CSS should not be allowed, unless explicitly
             //asked for on command line. In that case the only task is
@@ -8767,7 +8771,7 @@ function (lang,   logger,   file,          parse,    optimize,   pragma,
             context = layer.context,
             anonDefRegExp = config.anonDefRegExp,
             path, reqIndex, fileContents, currContents,
-            i, moduleName,
+            i, moduleName, includeRequire,
             parts, builder, writeApi;
 
         //Use override settings, particularly for pragmas
@@ -8781,8 +8785,19 @@ function (lang,   logger,   file,          parse,    optimize,   pragma,
                              (config.dir ? module._buildPath.replace(config.dir, "") : module._buildPath) +
                              "\n----------------\n";
 
+        //If the file wants require.js added to the module, add it now
+        requireContents = "";
+        includeRequire = false;
+        if ("includeRequire" in module) {
+            includeRequire = module.includeRequire;
+        }
+        if (includeRequire) {
+            requireContents = pragma.process(config.requireUrl, file.readFile(config.requireUrl), config);
+            buildFileContents += "require.js\n";
+        }
+
         //If there was an existing file with require in it, hoist to the top.
-        if (layer.existingRequireUrl) {
+        if (!includeRequire && layer.existingRequireUrl) {
             reqIndex = layer.buildFilePaths.indexOf(layer.existingRequireUrl);
             if (reqIndex !== -1) {
                 layer.buildFilePaths.splice(reqIndex, 1);
@@ -8846,6 +8861,9 @@ function (lang,   logger,   file,          parse,    optimize,   pragma,
                 }
             }
         }
+
+        //Add the require file contents to the head of the file.
+        fileContents = (requireContents ? requireContents + "\n" : "") + fileContents;
 
         return {
             text: config.wrap ?
