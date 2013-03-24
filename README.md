@@ -1,3 +1,8 @@
+### Note: 
+
+This project is not actively maintained. 
+If you would like to help maintaining it, please send an email to jakewins [at] gmail.com, or, even better, send a pull request with some fixes and a note that you'd be interested in getting commit access.
+
 # Brew maven plugin
 
 Build javascript apps (optionally using coffeescript) using the CommonJS Asynchronous Module Definition (AMD) 
